@@ -1,51 +1,46 @@
 # RegisterSoftware
 ```
-FLOW_CHART
 src/
+│
 ├── main/
 │   └── Main.java
 │
 ├── model/
 │   ├── User.java
 │   ├── Student.java
-│   ├── Instructor.java
 │   ├── Admin.java
 │   │
 │   ├── Course.java
 │   ├── Section.java
 │   ├── TimeSlot.java
-│   ├── Registration.java        ⭐ เพิ่ม
-│   └── RegistrationStatus.java  ⭐ เพิ่ม
+│   ├── Registration.java
+│   └── RegistrationStatus.java
 │
 ├── exception/
 │   ├── CourseFullException.java
 │   ├── AlreadyRegisteredException.java
-│   ├── ScheduleConflictException.java  ⭐ เพิ่ม
-│   ├── PrerequisiteException.java      ⭐ เพิ่ม
-│   └── AuthenticationException.java   ⭐ เพิ่ม
+│   └── ScheduleConflictException.java
 │
 ├── repository/
-│   ├── Repository.java                ⭐ เพิ่ม Interface
-│   ├── StudentRepository.java
 │   ├── CourseRepository.java
+│   ├── StudentRepository.java
 │   ├── SectionRepository.java
-│   └── GoogleSheetRepository.java
+│   ├── RegistrationRepository.java
+│   └── CsvRepository.java
 │
 ├── service/
 │   ├── AuthenticationService.java
-│   ├── RegistrationService.java
-│   ├── CourseManageService.java
-│   └── ScheduleService.java           ⭐ เพิ่ม
+│   ├── CourseService.java
+│   └── RegistrationService.java
 │
 ├── ui/
 │   ├── LoginGUI.java
-│   ├── StudentDashboard.java
-│   ├── InstructorDashboard.java
 │   ├── AdminDashboard.java
-│   ├── CourseSearchGUI.java           ⭐ เพิ่ม
-│   ├── CourseDetailGUI.java           ⭐ เพิ่ม
-│   └── ScheduleGUI.java               ⭐ เพิ่ม
+│   ├── StudentDashboard.java
+│   ├── CreateSectionGUI.java
+│   ├── CourseListGUI.java
+│   └── MyCoursesGUI.java
 │
-└── util/                              ⭐ เพิ่ม
+└── util/
     ├── Session.java
     └── Validation.java
