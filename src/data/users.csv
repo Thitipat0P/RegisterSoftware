@@ -1,0 +1,4 @@
+id,password,name,role
+admin01,1234,Admin Manee,ADMIN
+inst01,pass,Dr. Somchai,INSTRUCTOR
+661234,stu123,Phakin,STUDENT
