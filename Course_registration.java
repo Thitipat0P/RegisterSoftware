@@ -14,7 +14,7 @@ public class Course_registration {
             frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
             
             // 2. Put our Login screen design inside this main window
-            frame.setContentPane(new LoginGUI());
+            frame.setContentPane(new AdminDashboard());
             
             // 3. Auto-fit the window size to the components and place it at the center of screen
             frame.pack();
