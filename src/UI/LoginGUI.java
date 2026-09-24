@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,18 +18,13 @@ import javax.swing.SwingUtilities;
 import services.Authentication;
 
 /**
- * หน้าจอ Login ของระบบลงทะเบียนเรียน 
+ * หน้า Login ของระบบลงทะเบียนเรียน 
  * 
- * 
- *
  * โครงสร้างหน้าจอแบ่งออกเป็น 2 ฝั่งหลัก:
- *  - ฝั่งซ้าย (jPanel1)  : พื้นหลังสีน้ำเงินเข้ม แสดงชื่อระบบ (Course Registration System) พร้อมวงกลมตกแต่ง
+ *  - ฝั่งซ้าย (jPanel1)  : พื้นหลังสีน้ำเงินเข้ม แสดงชื่อระบบ (Course Registration System) 
  *  - ฝั่งขวา (jPanel2)  : พื้นหลังสีเทาอ่อน มีฟอร์มกรอก Student ID / Password และปุ่ม Login
- *
- * หมายเหตุการแก้ไข:
- *  - เปลี่ยนจาก NetBeans AbsoluteLayout มาเป็น Swing Standard Layout (null layout + setBounds)
- *    เพื่อให้สามารถคอมไพล์และรันบน VS Code ได้ทันทีโดยไม่ต้องลงไลบรารีภายนอกเพิ่ม
  */
+
 public class LoginGUI extends JPanel {
     // LOGIN ID PASSWORD check
     private Authentication authService = new Authentication();
@@ -52,15 +46,12 @@ public class LoginGUI extends JPanel {
 
     // Components ฝั่งซ้าย (Branding Area)
     private JPanel jPanel1;
-    private JLabel jLabel1; // วงกลมตกแต่งมุมล่างขวา
-    private JLabel jLabel2; // วงกลมตกแต่งมุมซ้ายบน
     private JLabel jLabel4; // ข้อความบรรทัดที่ 3: "System"
     private JLabel jLabel5; // ข้อความบรรทัดที่ 1: "Course"
     private JLabel jLabel6; // ข้อความบรรทัดที่ 2: "Registration"
 
     // Components ฝั่งขวา (Login Form Area)
     private JPanel jPanel2;
-    private JLabel jLabel3; // รูปการ์ดพื้นหลัง (bg_login.png)
     private JLabel jLabel7; // ข้อความหัวข้อ "Password"
     private JLabel jLabel8; // ข้อความต้อนรับ "Sign in to continue"
     private JLabel jLabel9; // ข้อความหัวข้อ "Student ID"
@@ -95,17 +86,7 @@ public class LoginGUI extends JPanel {
         jPanel1.setLayout(null);
         jPanel1.setBounds(0, 0, 510, 600);
 
-        // วงกลมตกแต่งมุมบนซ้าย (วางพิกัดติดลบเพื่อให้ภาพล้นออกไปนอกกรอบตามดีไซน์เดิม)
-        jLabel2 = new JLabel(loadIcon("/course_registration/picture/cornor_circle.png"));
-        jLabel2.setBounds(-110, -110, 300, 300);
-        jPanel1.add(jLabel2);
-
-        // วงกลมตกแต่งมุมล่างขวา
-        jLabel1 = new JLabel(loadIcon("/course_registration/picture/cornor_circle.png"));
-        jLabel1.setBounds(330, 410, 300, 300);
-        jPanel1.add(jLabel1);
-
-        // ข้อความชื่อระบบ 3 บรรทัด
+        // แสดงข้อความ Course Registration System ที่ฝั่งซ้าย
         jLabel5 = createBrandLabel("Course", 80, 210, 250, 40);
         jLabel6 = createBrandLabel("Registration", 80, 240, 300, 60);
         jLabel4 = createBrandLabel("System", 80, 290, 250, 60);
@@ -181,14 +162,9 @@ public class LoginGUI extends JPanel {
         loginbutton.setFocusPainted(false);
         loginbutton.setBounds(160, 390, 140, 30);
         loginbutton.addActionListener(this::loginbuttonActionPerformed);
+        add(jPanel2);
         jPanel2.add(loginbutton);
 
-        // รูปภาพการ์ดตกแต่งด้านหลังฟอร์ม (bg_login.png)
-        jLabel3 = new JLabel(loadIcon("/course_registration/picture/bg_login.png"));
-        jLabel3.setBounds(60, 50, 340, 500);
-        jPanel2.add(jLabel3);
-
-        add(jPanel2);
     }
 
     // ===================== พฤติกรรม Placeholder ของช่องกรอกข้อมูล =====================
@@ -298,17 +274,7 @@ public class LoginGUI extends JPanel {
     }
     }
 
-    /**
-     * โหลดรูปภาพจาก Classpath พร้อมระบบป้องกันโปรแกรมล่มหากหาไฟล์รูปไม่เจอ
-     */
-    private ImageIcon loadIcon(String path) {
-        java.net.URL url = getClass().getResource(path);
-        if (url == null) {
-            System.err.println("Warning: ไม่พบไฟล์รูปภาพที่ " + path + " (เช็ค path และตำแหน่งไฟล์ในโฟลเดอร์ resources)");
-            return new ImageIcon(); // คืนไอคอนว่าง กันโปรแกรม Crash
-        }
-        return new ImageIcon(url);
-    }
+    
 
     // main
 
