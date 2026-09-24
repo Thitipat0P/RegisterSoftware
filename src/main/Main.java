@@ -3,7 +3,7 @@ package main;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import UI.LoginGUI;
+import ui.LoginGUI;
 
 public class Main {
     public static void main(String[] args) {
