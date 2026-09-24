@@ -1,4 +1,46 @@
 # RegisterSoftware
 ```
-ภาคิน ศรีเหรา 6821601348 รับผิดชอบ model/(User,StudentDashboard,AdminDashboard) ,service (AuthenticationService)
-ธิติพัทธ์ พงษ์พิทักษ์ 6821601127 รับผิดชอบ controller/(Logincontroller)
+src/
+│
+├── main/
+│   └── Main.java
+│
+├── model/
+│   ├── User.java
+│   ├── Student.java
+│   ├── Admin.java
+│   │
+│   ├── Course.java
+│   ├── Section.java
+│   ├── TimeSlot.java
+│   ├── Registration.java
+│   └── RegistrationStatus.java
+│
+├── exception/
+│   ├── CourseFullException.java
+│   ├── AlreadyRegisteredException.java
+│   └── ScheduleConflictException.java
+│
+├── repository/
+│   ├── CourseRepository.java
+│   ├── StudentRepository.java
+│   ├── SectionRepository.java
+│   ├── RegistrationRepository.java
+│   └── CsvRepository.java
+│
+├── service/
+│   ├── AuthenticationService.java
+│   ├── CourseService.java
+│   └── RegistrationService.java
+│
+├── ui/
+│   ├── LoginGUI.java
+│   ├── AdminDashboard.java
+│   ├── StudentDashboard.java
+│   ├── CreateSectionGUI.java
+│   ├── CourseListGUI.java
+│   └── MyCoursesGUI.java
+│
+└── util/
+    ├── Session.java
+    └── Validation.java
