@@ -1,12 +1,12 @@
 package ui;
  
 
-public class Student extends javax.swing.JPanel {
+public class StudentDashboard extends javax.swing.JPanel {
  
     /**
      * Creates new form Student
      */
-    public Student() {
+    public StudentDashboard() {
         initComponents();
     }
  
@@ -47,7 +47,7 @@ public class Student extends javax.swing.JPanel {
         javax.swing.SwingUtilities.invokeLater(() -> {
             javax.swing.JFrame frame = new javax.swing.JFrame("Course Registration - Student");
             frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-            frame.getContentPane().add(new Student());
+            frame.getContentPane().add(new StudentDashboard());
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

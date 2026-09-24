@@ -1,11 +1,11 @@
 package ui;
  
-public class AdminDashboard extends javax.swing.JPanel {
+public class Admin extends javax.swing.JPanel {
  
     /**
      * Creates new form Admin
      */
-    public AdminDashboard() {
+    public Admin() {
         initComponents();
     }
  
@@ -46,7 +46,7 @@ public class AdminDashboard extends javax.swing.JPanel {
         javax.swing.SwingUtilities.invokeLater(() -> {
             javax.swing.JFrame frame = new javax.swing.JFrame("Course Registration - Admin");
             frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-            frame.getContentPane().add(new AdminDashboard());
+            frame.getContentPane().add(new Admin());
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

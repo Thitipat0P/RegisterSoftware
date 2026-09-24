@@ -1,11 +1,12 @@
 package ui;
  
-public class AdminDashboard extends javax.swing.JPanel {
+
+public class Student extends javax.swing.JPanel {
  
     /**
-     * Creates new form Admin
+     * Creates new form Student
      */
-    public AdminDashboard() {
+    public Student() {
         initComponents();
     }
  
@@ -35,18 +36,18 @@ public class AdminDashboard extends javax.swing.JPanel {
     // End of variables declaration                   
  
     // ---------- เพิ่มเข้ามา: ไว้รันดูหน้านี้เดี่ยวๆ เร็วๆ ผ่าน VS Code ----------
-    // ตอนนี้ panel ยังว่างเปล่า (ขนาด 970x600 ให้ตรงกับ Login/Dashboard) เพราะยังไม่ได้ใส่ component
-    // เข้าไปใน initComponents() เปิดมาดูก่อนได้ว่าหน้าต่างขึ้นจริงไหม แล้วค่อยเพิ่ม component ทีหลัง
-    // ตอนใช้งานจริงในโปรเจกต์ ไม่ต้องเรียก main() นี้ — เอา Admin ไปใส่ใน JFrame หลักของแอปแทน
+    // ตอนนี้ panel ยังว่างเปล่า (แค่ 400x300 ไม่มี component) เพราะยังไม่ได้ใส่อะไรเข้าไปใน initComponents()
+    // เปิดมาดูก่อนได้ว่าหน้าต่างขึ้นจริงไหม แล้วค่อยเพิ่ม component ทีหลัง
+    // ตอนใช้งานจริงในโปรเจกต์ ไม่ต้องเรียก main() นี้ — เอา Student ไปใส่ใน JFrame หลักของแอปแทน
     public static void main(String[] args) {
         try {
             javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
         }
         javax.swing.SwingUtilities.invokeLater(() -> {
-            javax.swing.JFrame frame = new javax.swing.JFrame("Course Registration - Admin");
+            javax.swing.JFrame frame = new javax.swing.JFrame("Course Registration - Student");
             frame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-            frame.getContentPane().add(new AdminDashboard());
+            frame.getContentPane().add(new Student());
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
