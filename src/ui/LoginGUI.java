@@ -183,10 +183,10 @@ public class LoginGUI extends JPanel {
         // ตรวจสอบเงื่อนไขเพื่อเปิดหน้าจอแยกตาม Role
         if (role.trim().toUpperCase().equals("ADMIN")) {
             targetFrame.setTitle("Course Registration - Admin Dashboard");
-            targetFrame.setContentPane(new Admin()); 
+            targetFrame.setContentPane(new AdminDashboard()); 
         } else if (role.trim().toUpperCase().equals("STUDENT")) {
             targetFrame.setTitle("Course Registration - Student Dashboard");
-            targetFrame.setContentPane(new Student()); 
+            targetFrame.setContentPane(new StudentDashboard()); 
         }
         
         // จัดขนาดและแสดงหน้าต่างใหม่
