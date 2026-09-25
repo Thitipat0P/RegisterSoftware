@@ -1,28 +1,37 @@
 package controller;
 
 import service.AuthenticationService;
-/**
- * ตัวจัดการ "logic ของปุ่ม Login" แยกออกจากหน้าจอ
- * ห้าม import javax.swing ในคลาสนี้ (เรื่องหน้าต่าง/dialog เป็นหน้าที่ของ UI)
- */
+import ui.AdminDashboard;
+import ui.LoginGUI;
+import ui.StudentDashboard;
+
+import javax.swing.*;
+
 public class LoginController {
 
-    private final AuthenticationService authService = new AuthenticationService();
+    private AuthenticationService authService;
 
-    /**
-     * @return role ("ADMIN" หรือ "STUDENT") ถ้า login ผ่าน
-     * @throws IllegalArgumentException ถ้ากรอกไม่ครบ หรือ ID/Password ผิด
-     *         (UI เอา e.getMessage() ไปแสดงได้เลย)
-     */
-    public String login(String id, String password) {
-        if (id == null || id.trim().isEmpty() || password == null || password.isEmpty()) {
-            throw new IllegalArgumentException("Please enter your ID and Password!");
-        }
+    public LoginController(AuthenticationService authService) {
+        this.authService = authService;
+    }
 
-        String role = authService.login(id.trim(), password);
+    public void processLogin(String studentId, String password) {
+
+        String role = authService.login(studentId, password);
+
         if (role == null) {
-            throw new IllegalArgumentException("ID or Password is incorrect!");
+            JOptionPane.showMessageDialog(
+                null,
+                "ID or Password are INCORECT! or NULL!"
+            );
+            new LoginGUI().setVisible(true);
         }
-        return role.trim().toUpperCase();
+
+        if (role.equals("ADMIN")) {
+            new AdminDashboard().setVisible(true);
+
+        } else if (role.equals("STUDENT")) {
+            new StudentDashboard().setVisible(true);
+        }
     }
 }
