@@ -12,7 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-
 import service.AuthenticationService;
 
 /**
@@ -64,7 +63,6 @@ public class LoginGUI extends JPanel {
         // ใช้ Null Layout เพื่อกำหนดพิกัด x, y, width, height ได้เองอย่างอิสระ
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
-
         buildLeftBrandingPanel();
         buildRightLoginPanel();
     }
@@ -117,7 +115,7 @@ public class LoginGUI extends JPanel {
         jPanel2.add(jLabel8);
 
         // Header & Field: Student ID
-        jLabel9 = new JLabel("USER ID");
+        jLabel9 = new JLabel("ID");
         jLabel9.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
         jLabel9.setBounds(120, 220, 140, 20);
         jPanel2.add(jLabel9);
@@ -135,8 +133,7 @@ public class LoginGUI extends JPanel {
         jPanel2.add(jLabel7);
 
         passtext = new JPasswordField();
-        passtext.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        passtext.setEchoChar((char) 0); // แสดงข้อความ Placeholder ปกติก่อนที่ผู้ใช้จะเริ่มพิมพ์
+        passtext.setFont(new Font("Segoe UI", Font.PLAIN, 18)); 
         passtext.setBounds(120, 320, 230, 40);
         jPanel2.add(passtext);
 
