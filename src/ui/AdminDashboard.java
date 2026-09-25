@@ -1,9 +1,12 @@
 package ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -92,6 +95,12 @@ public class AdminDashboard extends JPanel {
         btnDashboard.setForeground(new Color(255, 255, 255));
         btnDashboard.setText("Dashboard");
         btnDashboard.setBounds(20, 130, 170, 40);
+        btnDashboard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                ButtonToDashboard(evt);
+            }
+        });
         btnDashboard.addActionListener(this::btnDashboardActionPerformed);
         sidebarPanel.add(btnDashboard);
 
@@ -102,6 +111,12 @@ public class AdminDashboard extends JPanel {
         btnManageCourses.setForeground(new Color(255, 255, 255));
         btnManageCourses.setText("Manage Courses");
         btnManageCourses.setBounds(20, 190, 170, 40);
+        btnManageCourses.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                ButtonToManage(evt);
+            }
+        });
         btnManageCourses.addActionListener(this::btnManageCoursesActionPerformed);
         sidebarPanel.add(btnManageCourses);
 
@@ -227,5 +242,23 @@ public class AdminDashboard extends JPanel {
 
     private void btnNav4ActionPerformed(ActionEvent evt) {
         // TODO: ใส่ Logic เมื่อกดปุ่ม Nav 4
+    }
+
+    private void ButtonToDashboard(MouseEvent evt) {
+        Dashboard menu1 = new Dashboard();
+        mainContentPanel.removeAll();
+        mainContentPanel.setLayout(new BorderLayout());
+        mainContentPanel.add(menu1, BorderLayout.CENTER);
+        mainContentPanel.revalidate();
+        mainContentPanel.repaint();
+    }
+
+    private void ButtonToManage(MouseEvent evt) {
+        Manage menu2 = new Manage();
+        mainContentPanel.removeAll();
+        mainContentPanel.setLayout(new BorderLayout());
+        mainContentPanel.add(menu2, BorderLayout.CENTER);
+        mainContentPanel.revalidate();
+        mainContentPanel.repaint();
     }
 }
