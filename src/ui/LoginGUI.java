@@ -15,6 +15,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import controller.LoginController;
 import service.AuthenticationService;
 
 /**
@@ -26,8 +27,7 @@ import service.AuthenticationService;
  */
 
 public class LoginGUI extends JPanel {
-    // LOGIN ID PASSWORD check
-    private AuthenticationService authService = new AuthenticationService();
+
 
     // ===================== ค่าคงที่กำหนดสไตล์และข้อความเริ่มต้น =====================
 
@@ -228,52 +228,20 @@ public class LoginGUI extends JPanel {
         // TODO: สามารถใส่ Logic ที่ต้องการให้ทำงานเมื่อกด Enter ในช่อง Student ID
     }
 
-    private void loginbuttonActionPerformed(ActionEvent evt) {
-        String studentId = usertext.getText();
+    //เมื่อกดปุ่มล็อกอิน
+   private void loginbuttonActionPerformed(ActionEvent evt) {
+
+    String studentId = usertext.getText();
     String password = new String(passtext.getPassword());
 
-    // 2. ป้องกันผู้ใช้กด Login โดยที่ยังไม่ได้พิมพ์อะไร (ดึงค่า Placeholder มาส่ง)
-    if (studentId.equals(PLACEHOLDER_STUDENT_ID) || password.equals(PLACEHOLDER_PASSWORD) || studentId.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Please enter your ID and Password!", "Warning", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
+    AuthenticationService authService = new AuthenticationService();
 
-    // 3. ส่งค่าไปให้ authService ตรวจสอบกับไฟล์ CSV
-    String role = authService.login(studentId, password);
+    LoginController controller = new LoginController(authService);
 
-    // 4. ตรวจสอบ Role ที่ได้กลับมา
-    if (role != null) {
-        // ปิดหน้าต่าง Login ปัจจุบัน
-        java.awt.Window currentWindow = SwingUtilities.getWindowAncestor(this);
-        if (currentWindow != null) {
-            currentWindow.dispose();
-        }
-        
-        // สร้างหน้าต่างใหม่
-        JFrame targetFrame = new JFrame();
-        targetFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        targetFrame.setResizable(false);
-        
-        // ตรวจสอบเงื่อนไขเพื่อเปิดหน้าจอแยกตาม Role
-        if (role.trim().toUpperCase().equals("ADMIN")) {
-            targetFrame.setTitle("Course Registration - Admin Dashboard");
-            targetFrame.setContentPane(new Admin()); 
-        } else if (role.trim().toUpperCase().equals("STUDENT")) {
-            targetFrame.setTitle("Course Registration - Student Dashboard");
-            targetFrame.setContentPane(new Student()); 
-        }
-        
-        // จัดขนาดและแสดงหน้าต่างใหม่
-        targetFrame.pack();
-        targetFrame.setLocationRelativeTo(null);
-        targetFrame.setVisible(true);
-        
-    } else {
-        // กรณีค้นหาไม่เจอ หรือ รหัสผิด
-        JOptionPane.showMessageDialog(this, "ID หรือ Password ไม่ถูกต้อง!", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-    }
+    controller.processLogin(studentId, password);
 
+    this.setVisible(false);
+}
     
 
     // main
