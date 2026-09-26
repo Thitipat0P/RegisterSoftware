@@ -1,8 +1,11 @@
 package ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -10,22 +13,22 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * หน้า Sub-panel สำหรับแสดง Dashboard ของนักศึกษา
+ * หน้า Sub-panel สำหรับแสดงรายวิชาที่เปิดให้ลงทะเบียน (Register Course)
  */
-public class Dashboard extends JPanel {
+public class RegisterCourse extends JPanel {
 
     // ===================== ตัวแปร Component =====================
     private JLabel lblTitle;
-    private JLabel lblWelcome;
     private JPanel tableContainerPanel;
     private JLabel lblTableTitle;
     private JTable tblCourses;
     private JScrollPane scrollPane;
+    private JButton btnRegister;
 
     /**
-     * คอนสตรัคเตอร์สร้างหน้า Dashboard
+     * คอนสตรัคเตอร์สร้างหน้า RegisterCourse
      */
-    public Dashboard() {
+    public RegisterCourse() {
         initComponents();
     }
 
@@ -38,35 +41,28 @@ public class Dashboard extends JPanel {
         setLayout(null);
         setPreferredSize(new Dimension(760, 600));
 
-        // 1. ข้อความหัวเรื่อง "Student Dashboard"
-        lblTitle = new JLabel("Student Dashboard");
+        // 1. หัวข้อ "Register Course"
+        lblTitle = new JLabel("Register Course");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 36));
         lblTitle.setForeground(new Color(37, 51, 91));
-        lblTitle.setBounds(30, 30, 440, 40);
+        lblTitle.setBounds(30, 30, 440, 50);
         add(lblTitle);
 
-        // 2. ข้อความต้อนรับ "Welcome, Student"
-        lblWelcome = new JLabel("Welcome, Student ");
-        lblWelcome.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-        lblWelcome.setForeground(new Color(86, 101, 144));
-        lblWelcome.setBounds(30, 70, 230, 30);
-        add(lblWelcome);
-
-        // 3. กรอบการ์ดสีขาวสำหรับใส่ตาราง
+        // 2. กรอบการ์ดสีขาวสำหรับใส่ตารางและปุ่ม
         tableContainerPanel = new JPanel();
         tableContainerPanel.setBackground(Color.WHITE);
         tableContainerPanel.setLayout(null);
         tableContainerPanel.setBounds(20, 110, 710, 450);
 
-        // หัวข้อตาราง "My Registered Courses"
-        lblTableTitle = new JLabel("My Registered Courses");
+        // หัวข้อตาราง "Available Courses"
+        lblTableTitle = new JLabel("Available Courses");
         lblTableTitle.setFont(new Font("Leelawadee UI", Font.PLAIN, 20));
         lblTableTitle.setForeground(new Color(37, 51, 91));
-        lblTableTitle.setBounds(20, 10, 300, 30);
+        lblTableTitle.setBounds(21, 8, 215, 30);
         tableContainerPanel.add(lblTableTitle);
 
-        // สร้าง JTable (5 คอลัมน์ พร้อมระบุประเภทข้อมูลตามต้นฉบับ)
-        String[] columns = {"Course ID", "Course Name", "Credit", "Section", "Teacher"};
+        // สร้าง JTable (7 คอลัมน์)
+        String[] columns = {"Course ID", "Course Name", "Credit", "Section", "Teacher", "Status", "Seat"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
@@ -76,6 +72,8 @@ public class Dashboard extends JPanel {
                     case 2: return Integer.class;
                     case 3: return Integer.class;
                     case 4: return String.class;
+                    case 5: return Integer.class;
+                    case 6: return Integer.class;
                     default: return Object.class;
                 }
             }
@@ -85,9 +83,32 @@ public class Dashboard extends JPanel {
         tblCourses.setRowHeight(61); // ความสูงแถวตามต้นฉบับ
 
         scrollPane = new JScrollPane(tblCourses);
-        scrollPane.setBounds(20, 50, 670, 380);
+        scrollPane.setBounds(21, 50, 669, 328);
         tableContainerPanel.add(scrollPane);
+
+        // ปุ่ม Register
+        btnRegister = new JButton("Register");
+        btnRegister.setBackground(new Color(83, 96, 134));
+        btnRegister.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        btnRegister.setForeground(Color.WHITE);
+        btnRegister.setFocusPainted(false);
+        btnRegister.setBounds(292, 396, 130, 35);
+        btnRegister.addActionListener(this::btnRegisterActionPerformed);
+        tableContainerPanel.add(btnRegister);
 
         add(tableContainerPanel);
     }
+
+    // ===================== Event Handlers =====================
+
+    private void btnRegisterActionPerformed(ActionEvent evt) {
+        // สลับไปแสดงหน้า RegisClassWindow ภายในพื้นที่ Panel นี้
+        removeAll();
+        setLayout(new BorderLayout());
+        add(new RegisClassWindow(), BorderLayout.CENTER);
+        revalidate();
+        repaint();
+    }
 }
+
+

@@ -3,10 +3,10 @@ package main;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import ui.AdminDashboard;
-import ui.Dashboard;
+
+
 import ui.LoginGUI;
-import ui.Manage;
+import ui.StudentDashboard;
 
 public class Main {
     public static void main(String[] args) {

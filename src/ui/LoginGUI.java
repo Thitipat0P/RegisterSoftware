@@ -1,9 +1,12 @@
 package ui;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,40 +18,36 @@ import javax.swing.SwingUtilities;
 import controller.LoginController;
 
 /**
- * หน้า Login ของระบบลงทะเบียนเรียน 
- * 
- * โครงสร้างหน้าจอแบ่งออกเป็น 2 ฝั่ง:
- *  - ฝั่งซ้าย (jPanel1)  : แสดงชื่อระบบ (Course Registration System) 
- *  - ฝั่งขวา (jPanel2)  : มีฟอร์มกรอก Student ID / Password และปุ่ม Login
+ * หน้า Login ของระบบลงทะเบียนเรียน (รองรับการทำงานบน VS Code)
  */
-
 public class LoginGUI extends JPanel {
-    // LOGIN ID PASSWORD check
+
     private final LoginController loginController = new LoginController();
 
-    // ===================== ค่าคงที่กำหนดสไตล์และข้อความเริ่มต้น =====================
-    
-    // กำหนดโทนสีที่ใช้ในหน้าจอ
-    private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);         // สีน้ำเงินเข้มฝั่งซ้าย
-    private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);       // สีเทาอ่อนฝั่งขวา
-    private static final Color COLOR_BUTTON_BG = new Color(76, 110, 245);      // สีฟ้าปุ่ม Login
+    // ===================== ค่าคงที่กำหนดสไตล์ =====================
+    private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);     // สีน้ำเงินเข้มฝั่งซ้าย
+    private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);   // สีเทาอ่อนฝั่งขวา
+    private static final Color COLOR_BUTTON_BG = new Color(76, 110, 245);  // สีฟ้าปุ่ม Login
+    private static final Color COLOR_LINK = new Color(0, 0, 204);          // สีน้ำเงินลิงก์ Sign up
 
-    // ===================== ตัวแปร Component ของ Swing =====================
-
+    // ===================== ตัวแปร Component =====================
     // Components ฝั่งซ้าย (Branding Area)
-    private JPanel jPanel1;
-    private JLabel jLabel4; // ข้อความบรรทัดที่ 3: "System"
-    private JLabel jLabel5; // ข้อความบรรทัดที่ 1: "Course"
-    private JLabel jLabel6; // ข้อความบรรทัดที่ 2: "Registration"
+    private JPanel leftPanel;
+    private JLabel lblCourse;
+    private JLabel lblRegistration;
+    private JLabel lblSystem;
 
     // Components ฝั่งขวา (Login Form Area)
-    private JPanel jPanel2;
-    private JLabel jLabel7; // ข้อความหัวข้อ "Password"
-    private JLabel jLabel8; // ข้อความต้อนรับ "Sign in to continue"
-    private JLabel jLabel9; // ข้อความหัวข้อ "Student ID"
-    private JTextField usertext;  // ช่องกรอก Student ID
-    private JPasswordField passtext; // ช่องกรอก Password 
-    private JButton loginbutton;        // ปุ่ม Login
+    private JPanel rightPanel;
+    private JLabel lblSignInTitle;
+    private JLabel lblStudentId;
+    private JLabel lblPassword;
+    private JLabel lblNoAccount;
+    private JLabel lblSignUp;
+    
+    private JTextField txtStudentId;
+    private JPasswordField txtPassword;
+    private JButton btnLogin;
 
     /**
      * คอนสตรัคเตอร์สร้างหน้าจอ Login
@@ -60,37 +59,33 @@ public class LoginGUI extends JPanel {
     // ===================== สร้างและจัดวาง UI ทั้งหมด =====================
 
     private void initComponents() {
-        // ใช้ Null Layout เพื่อกำหนดพิกัด x, y, width, height ได้เองอย่างอิสระ
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
+
         buildLeftBrandingPanel();
         buildRightLoginPanel();
     }
 
     /**
-     * สร้างแผงฝั่งซ้าย (jPanel1): แสดงโลโก้ ชื่อระบบ
+     * แผงฝั่งซ้าย: แสดงชื่อระบบ
      */
     private void buildLeftBrandingPanel() {
-        jPanel1 = new JPanel();
-        jPanel1.setBackground(COLOR_BRAND_BG);
-        jPanel1.setLayout(null);
-        jPanel1.setBounds(0, 0, 510, 600);
+        leftPanel = new JPanel();
+        leftPanel.setBackground(COLOR_BRAND_BG);
+        leftPanel.setLayout(null);
+        leftPanel.setBounds(0, 0, 510, 600);
 
-        // แสดงข้อความ Course Registration System ที่ฝั่งซ้าย
-        jLabel5 = createBrandLabel("Course", 80, 210, 250, 40);
-        jLabel6 = createBrandLabel("Registration", 80, 240, 300, 60);
-        jLabel4 = createBrandLabel("System", 80, 290, 250, 60);
+        lblCourse = createBrandLabel("Course", 80, 210, 250, 40);
+        lblRegistration = createBrandLabel("Registration", 80, 240, 300, 60);
+        lblSystem = createBrandLabel("System", 80, 290, 250, 60);
 
-        jPanel1.add(jLabel5);
-        jPanel1.add(jLabel6);
-        jPanel1.add(jLabel4);
+        leftPanel.add(lblCourse);
+        leftPanel.add(lblRegistration);
+        leftPanel.add(lblSystem);
 
-        add(jPanel1);
+        add(leftPanel);
     }
 
-    /**
-     * ตัวช่วยสร้าง Label สำหรับข้อความแบรนด์ดิ้งฝั่งซ้าย เพื่อลดการเขียนโค้ดซ้ำซ้อน
-     */
     private JLabel createBrandLabel(String text, int x, int y, int width, int height) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.BOLD, 36));
@@ -100,98 +95,108 @@ public class LoginGUI extends JPanel {
     }
 
     /**
-     * สร้างแผงฝั่งขวา (jPanel2): ฟอร์ม Login กรอก Student ID และ Password
+     * แผงฝั่งขวา: ฟอร์มกรอกข้อมูลและปุ่มดำเนินการ
      */
     private void buildRightLoginPanel() {
-        jPanel2 = new JPanel();
-        jPanel2.setBackground(COLOR_PAGE_BG);
-        jPanel2.setLayout(null);
-        jPanel2.setBounds(510, 0, 460, 600);
+        rightPanel = new JPanel();
+        rightPanel.setBackground(COLOR_PAGE_BG);
+        rightPanel.setLayout(null);
+        rightPanel.setBounds(510, 0, 460, 600);
 
-        // ข้อความต้อนรับ "Sign in to continue"
-        jLabel8 = new JLabel("Sign in to continue");
-        jLabel8.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 22));
-        jLabel8.setBounds(120, 170, 250, 30);
-        jPanel2.add(jLabel8);
+        // หัวข้อ "Sign in to continue"
+        lblSignInTitle = new JLabel("Sign in to continue");
+        lblSignInTitle.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 22));
+        lblSignInTitle.setBounds(120, 170, 250, 30);
+        rightPanel.add(lblSignInTitle);
 
-        // Header & Field: Student ID
-        jLabel9 = new JLabel("ID");
-        jLabel9.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
-        jLabel9.setBounds(120, 220, 140, 20);
-        jPanel2.add(jLabel9);
+        // Label & Field: Student ID
+        lblStudentId = new JLabel("Student ID");
+        lblStudentId.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
+        lblStudentId.setBounds(120, 220, 140, 20);
+        rightPanel.add(lblStudentId);
 
-        usertext = new JTextField();
-        usertext.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        usertext.setBounds(120, 240, 230, 40);
-        usertext.addActionListener(this::usertextActionPerformed);
-        jPanel2.add(usertext);
+        txtStudentId = new JTextField();
+        txtStudentId.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        txtStudentId.setBounds(120, 240, 230, 40);
+        txtStudentId.addActionListener(this::btnLoginActionPerformed);
+        rightPanel.add(txtStudentId);
 
-        // Header & Field: Password
-        jLabel7 = new JLabel("Password");
-        jLabel7.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
-        jLabel7.setBounds(120, 300, 140, 20);
-        jPanel2.add(jLabel7);
+        // Label & Field: Password
+        lblPassword = new JLabel("Password");
+        lblPassword.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
+        lblPassword.setBounds(120, 300, 140, 20);
+        rightPanel.add(lblPassword);
 
-        passtext = new JPasswordField();
-        passtext.setFont(new Font("Segoe UI", Font.PLAIN, 18)); 
-        passtext.setBounds(120, 320, 230, 40);
-        jPanel2.add(passtext);
+        txtPassword = new JPasswordField();
+        txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        txtPassword.setBounds(120, 320, 230, 40);
+        txtPassword.addActionListener(this::btnLoginActionPerformed);
+        rightPanel.add(txtPassword);
 
         // ปุ่ม Login
-        loginbutton = new JButton("Login");
-        loginbutton.setBackground(COLOR_BUTTON_BG);
-        loginbutton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        loginbutton.setForeground(Color.WHITE);
-        loginbutton.setFocusPainted(false);
-        loginbutton.setBounds(160, 390, 140, 30);
-        loginbutton.addActionListener(this::loginbuttonActionPerformed);
-        add(jPanel2);
-        jPanel2.add(loginbutton);
+        btnLogin = new JButton("Login");
+        btnLogin.setBackground(COLOR_BUTTON_BG);
+        btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setFocusPainted(false);
+        btnLogin.setBounds(160, 390, 140, 30);
+        btnLogin.addActionListener(this::btnLoginActionPerformed);
+        rightPanel.add(btnLogin);
 
+        // ลิงก์ไปยังหน้าสมัครสมาชิก (Sign up)
+        lblNoAccount = new JLabel("Don't have an account?");
+        lblNoAccount.setBounds(130, 430, 150, 20);
+        rightPanel.add(lblNoAccount);
+
+        lblSignUp = new JLabel("Sign up");
+        lblSignUp.setForeground(COLOR_LINK);
+        lblSignUp.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblSignUp.setBounds(275, 430, 60, 20);
+        lblSignUp.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                lblSignUpMouseClicked(evt);
+            }
+        });
+        rightPanel.add(lblSignUp);
+
+        add(rightPanel);
     }
 
-    
-    // ===================== Event Handlers & Helper Methods =====================
+    // ===================== Event Handlers =====================
 
-    private void usertextActionPerformed(ActionEvent evt) {
-        loginbutton.doClick();
-    }
+    private void btnLoginActionPerformed(ActionEvent evt) {
+        String studentId = txtStudentId.getText();
+        String password = new String(txtPassword.getPassword());
 
-    private void loginbuttonActionPerformed(ActionEvent evt) {
-    String studentId = usertext.getText();
-    String password = new String(passtext.getPassword());
+        try {
+            String role = loginController.login(studentId, password);
 
-    try {
-        String role = loginController.login(studentId, password);   // controller ตรวจให้ทั้งหมดแล้ว
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            if (frame != null) {
+                if ("STUDENT".equalsIgnoreCase(role)) {
+                    frame.setTitle("Course Registration - Student Dashboard");
+                    frame.setContentPane(new StudentDashboard());
+                }
+                frame.revalidate();
+                frame.repaint();
+            }
 
-        java.awt.Window currentWindow = SwingUtilities.getWindowAncestor(this);
-        if (currentWindow != null) currentWindow.dispose();
-
-        JFrame targetFrame = new JFrame();
-        targetFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        targetFrame.setResizable(false);
-
-        if (role.equals("ADMIN")) {
-            targetFrame.setTitle("Course Registration - Admin Dashboard");
-            targetFrame.setContentPane(new AdminDashboard());
-        } else if (role.equals("STUDENT")) {
-            targetFrame.setTitle("Course Registration - Student Dashboard");
-            targetFrame.setContentPane(new StudentDashboard());
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        targetFrame.pack();
-        targetFrame.setLocationRelativeTo(null);
-        targetFrame.setVisible(true);
-
-    } catch (IllegalArgumentException e) {
-        JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
-}
 
-    
+    private void lblSignUpMouseClicked(MouseEvent evt) {
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame != null) {
+            frame.setContentPane(new AccountRegister()); // สลับไปหน้าสมัครสมาชิก
+            frame.revalidate();
+            frame.repaint();
+        }
+    }
 
-    // main
-
+    // เมธอด main สำหรับทดสอบรันเฉพาะหน้า Login
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Course Registration - Login");
