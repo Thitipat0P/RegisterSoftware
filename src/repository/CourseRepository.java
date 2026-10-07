@@ -6,8 +6,11 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import model.Course;
+
 
 /**
  * CSV format: courseId,name,credit,day,startTime,endTime
@@ -65,6 +68,19 @@ public class CourseRepository {
         return null;
     }
 
+    public void saveAll(List<Course> list) {
+    try (PrintWriter out = new PrintWriter(new FileWriter(FILE_PATH, false))) {
+        out.println("courseId,name,credit,day,startTime,endTime");
+        for (Course c : list) {
+            String t = c.hasSchedule()
+                    ? c.getDay().name().substring(0, 3) + "," + c.getStartTime() + "," + c.getEndTime()
+                    : ",,";
+            out.println(c.getCourseId() + "," + c.getName() + "," + c.getCredit() + "," + t);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
     private DayOfWeek parseDay(String s) {
         String t = s.trim().toUpperCase();
         if (t.length() < 3) return null;
