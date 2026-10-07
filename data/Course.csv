@@ -1,0 +1,6 @@
+courseId,name,credit,day,startTime,endTime
+CS101,Introduction to Programming,3,MON,09:00,12:00
+CS201,Data Structures,3,TUE,09:00,12:00
+CS202,Computer Architecture,3,TUE,11:00,14:00
+CS301,Database Systems,3,WED,13:00,16:00
+GE101,English for Communication,2,THU,13:00,15:00
