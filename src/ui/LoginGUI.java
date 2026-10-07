@@ -18,6 +18,8 @@ import javax.swing.SwingUtilities;
 
 import controller.LoginController;
 import model.Student;
+import controller.AdminController;
+import model.Admin;
 
 /**
  * หน้า Login ของระบบลงทะเบียนเรียน
@@ -25,6 +27,7 @@ import model.Student;
 public class LoginGUI extends JPanel {
 
     private final LoginController loginController = new LoginController();
+    private final AdminController adminController = new AdminController();
 
     private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);
     private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);
@@ -140,6 +143,18 @@ public class LoginGUI extends JPanel {
     private void btnLoginActionPerformed(ActionEvent evt) {
         String studentId = txtStudentId.getText();
         String password = new String(txtPassword.getPassword());
+
+        Admin admin = adminController.login(studentId, password);
+    if (admin != null) {
+        JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (f != null) {
+            f.setTitle("Course Registration - Admin");
+            f.setContentPane(new AdminDashboard(admin));
+            f.revalidate();
+            f.repaint();
+        }
+        return;
+    }
 
         try {
             Student student = loginController.login(studentId, password);

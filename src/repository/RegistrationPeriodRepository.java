@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.time.LocalDateTime;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import model.RegistrationPeriod;
 
@@ -34,5 +36,15 @@ public class RegistrationPeriodRepository {
             e.printStackTrace();
         }
         return null;
+    }
+    public boolean save(LocalDateTime open, LocalDateTime close) {
+        try (PrintWriter out = new PrintWriter(new FileWriter(FILE_PATH, false))) {
+            out.println("openAt,closeAt");
+            out.println(open + "," + close);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
