@@ -10,6 +10,7 @@ import model.Admin;
 import model.Course;
 import repository.AdminRepository;
 import repository.CourseRepository;
+import repository.EnrollmentRepository;
 import repository.RegistrationPeriodRepository;
 
 /** logic ฝั่ง Admin (ห้าม import javax.swing) */
@@ -17,6 +18,7 @@ public class AdminController {
 
     private final AdminRepository adminRepository = new AdminRepository();
     private final CourseRepository courseRepository = new CourseRepository();
+    private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final RegistrationPeriodRepository periodRepository = new RegistrationPeriodRepository();
 
     /** @return Admin ถ้า login ผ่าน, null ถ้าไม่ใช่ admin */
@@ -60,15 +62,23 @@ public class AdminController {
             }
         }
         all.add(new Course(id.trim(), name.trim(), cr, d, s, e));
-        courseRepository.saveAll(all);  
+        courseRepository.saveAll(all);
     }
 
     public void deleteCourse(String courseId) {
         List<Course> all = courseRepository.getAllCourses();
-        if (!all.removeIf(c -> c.getCourseId().equals(courseId))) {
+        Course found = null;
+        for (Course c : all) {
+            if (c.getCourseId().equals(courseId)) {
+                found = c;
+            }
+        }
+        if (found == null) {
             throw new IllegalArgumentException("Course not found: " + courseId);
         }
+        all.remove(found);
         courseRepository.saveAll(all);
+        enrollmentRepository.removeByCourse(courseId); // ลบข้อมูลลงทะเบียนของวิชานี้ด้วย
     }
 
     /** @param open/close ISO เช่น 2026-10-01T08:00 */

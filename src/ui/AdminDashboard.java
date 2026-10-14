@@ -1,8 +1,22 @@
 package ui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import controller.AdminController;
@@ -20,44 +34,65 @@ public class AdminDashboard extends JPanel {
     private static final Color BG = new Color(236, 238, 248);
 
     private final Admin admin;
-    private final AdminController ctrl = new AdminController();
+    private final AdminController controller = new AdminController();
+    private final CourseRepository courseRepository = new CourseRepository();
+    private final RegistrationPeriodRepository periodRepository = new RegistrationPeriodRepository();
     private final JPanel content = new JPanel(new BorderLayout());
+
+    // หน้า Manage Courses
+    private JTable tblCourses;
+    private JTextField txtId;
+    private JTextField txtName;
+    private JTextField txtCredit;
+    private JTextField txtStart;
+    private JTextField txtEnd;
+    private JComboBox<String> cmbDay;
+
+    // หน้า Registration Period
+    private JTextField txtOpen;
+    private JTextField txtClose;
 
     public AdminDashboard(Admin admin) {
         this.admin = admin;
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
 
+        // ------------------ Side Panel ------------------
         JPanel side = new JPanel(null);
         side.setBackground(NAVY);
         side.setBounds(0, 0, 210, 600);
-        JLabel t = new JLabel("<html>Admin<br>Panel</html>");
-        t.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        t.setForeground(Color.WHITE);
-        t.setBounds(20, 30, 170, 70);
-        side.add(t);
-        JLabel who = new JLabel(admin.getName());
-        who.setForeground(Color.WHITE);
-        who.setBounds(20, 100, 170, 20);
-        side.add(who);
-        side.add(menu("Manage Courses", 130, e -> show(coursePanel())));
-        side.add(menu("Registration Period", 190, e -> show(periodPanel())));
-        side.add(menu("Logout", 250, e -> logout()));
+
+        JLabel lblTitle = new JLabel("<html>Admin<br>Panel</html>");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setBounds(20, 30, 170, 70);
+        side.add(lblTitle);
+
+        JLabel lblName = new JLabel(admin.getName());
+        lblName.setForeground(Color.WHITE);
+        lblName.setBounds(20, 100, 170, 20);
+        side.add(lblName);
+
+        side.add(createMenuButton("Manage Courses", 130, this::btnManageCoursesActionPerformed));
+        side.add(createMenuButton("Registration Period", 190, this::btnPeriodActionPerformed));
+        side.add(createMenuButton("Logout", 250, this::btnLogoutActionPerformed));
         add(side);
 
+        // ------------------ Main Content ------------------
         content.setBounds(210, 0, 760, 600);
         add(content);
-        show(coursePanel());
+        showPanel(createCoursePanel());
     }
 
-    // ---------- helpers ----------
-    private JButton menu(String text, int y, ActionListener l) {
-        JButton b = button(text, 20, y, 170, 40);
-        b.addActionListener(l);
+    // ===================== ตัวช่วยสร้างหน้าจอ =====================
+
+    private JButton createMenuButton(String text, int y, ActionListener listener) {
+        JButton b = createButton(text, 20, y, 170, 40);
+        b.addActionListener(listener);
         return b;
     }
 
-    private JButton button(String text, int x, int y, int w, int h) {
+    private JButton createButton(String text, int x, int y, int w, int h) {
         JButton b = new JButton(text);
         b.setBackground(BTN);
         b.setForeground(Color.WHITE);
@@ -66,123 +101,191 @@ public class AdminDashboard extends JPanel {
         return b;
     }
 
-    private JPanel page(String title) {
+    /** สร้างหน้าเปล่าที่มีหัวข้อใหญ่ด้านบน */
+    private JPanel createPage(String title) {
         JPanel p = new JPanel(null);
         p.setBackground(BG);
-        JLabel l = new JLabel(title);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 36));
-        l.setForeground(NAVY);
-        l.setBounds(30, 30, 500, 50);
-        p.add(l);
+        JLabel lbl = new JLabel(title);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        lbl.setForeground(NAVY);
+        lbl.setBounds(30, 30, 500, 50);
+        p.add(lbl);
         return p;
     }
 
-    private void show(JPanel p) {
+    private void showPanel(JPanel p) {
         content.removeAll();
         content.add(p, BorderLayout.CENTER);
         content.revalidate();
         content.repaint();
     }
 
-    private void err(String msg) {
-        JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void logout() {
-        JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
-        if (f != null) {
-            f.setTitle("Course Registration - Login");
-            f.setContentPane(new LoginGUI());
-            f.revalidate();
-            f.repaint();
+    // ===================== ปุ่มเมนูด้านซ้าย =====================
+
+    private void btnManageCoursesActionPerformed(ActionEvent evt) {
+        showPanel(createCoursePanel());
+    }
+
+    private void btnPeriodActionPerformed(ActionEvent evt) {
+        showPanel(createPeriodPanel());
+    }
+
+    private void btnLogoutActionPerformed(ActionEvent evt) {
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame != null) {
+            frame.setTitle("Course Registration - Login");
+            frame.setContentPane(new LoginGUI());
+            frame.revalidate();
+            frame.repaint();
         }
     }
 
-    // ---------- Manage Courses ----------
-    private JPanel coursePanel() {
-        JPanel p = page("Manage Courses");
-        DefaultTableModel m = new DefaultTableModel(new String[]{"Course ID", "Name", "Credit", "Class Time"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        JTable tbl = new JTable(m);
-        tbl.setRowHeight(30);
-        JScrollPane sp = new JScrollPane(tbl);
-        sp.setBounds(20, 90, 720, 300);
-        p.add(sp);
+    // ===================== หน้า Manage Courses =====================
 
-        Runnable reload = () -> {
-            m.setRowCount(0);
-            for (Course c : new CourseRepository().getAllCourses())
-                m.addRow(new Object[]{c.getCourseId(), c.getName(), c.getCredit(), c.getScheduleText()});
-        };
-        reload.run();
+    private JPanel createCoursePanel() {
+        JPanel p = createPage("Manage Courses");
 
-        JTextField id = new JTextField(), name = new JTextField(), credit = new JTextField(),
-                start = new JTextField("09:00"), end = new JTextField("12:00");
-        JComboBox<String> day = new JComboBox<>(new String[]{"TBA", "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"});
+        // ตารางรายวิชา
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Course ID", "Name", "Credit", "Class Time"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        tblCourses = new JTable(model);
+        tblCourses.setRowHeight(30);
+        JScrollPane scrollPane = new JScrollPane(tblCourses);
+        scrollPane.setBounds(20, 90, 720, 300);
+        p.add(scrollPane);
+
+        // ฟอร์มกรอกข้อมูลวิชาใหม่
+        txtId = new JTextField();
+        txtName = new JTextField();
+        txtCredit = new JTextField();
+        txtStart = new JTextField("09:00");
+        txtEnd = new JTextField("12:00");
+        cmbDay = new JComboBox<>(new String[]{"TBA", "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"});
 
         JPanel form = new JPanel(new GridLayout(2, 6, 6, 2));
         form.setOpaque(false);
         form.setBounds(20, 400, 720, 50);
-        for (String s : new String[]{"ID", "Name", "Credit", "Day", "Start", "End"}) form.add(new JLabel(s));
-        form.add(id); form.add(name); form.add(credit); form.add(day); form.add(start); form.add(end);
+        form.add(new JLabel("ID"));
+        form.add(new JLabel("Name"));
+        form.add(new JLabel("Credit"));
+        form.add(new JLabel("Day"));
+        form.add(new JLabel("Start"));
+        form.add(new JLabel("End"));
+        form.add(txtId);
+        form.add(txtName);
+        form.add(txtCredit);
+        form.add(cmbDay);
+        form.add(txtStart);
+        form.add(txtEnd);
         p.add(form);
 
-        JButton add = button("Add", 230, 470, 130, 35);
-        add.addActionListener(e -> {
-            try {
-                ctrl.addCourse(id.getText(), name.getText(), credit.getText(),
-                        (String) day.getSelectedItem(), start.getText(), end.getText());
-                id.setText(""); name.setText(""); credit.setText("");
-                reload.run();
-            } catch (IllegalArgumentException ex) { err(ex.getMessage()); }
-        });
-        p.add(add);
+        // ปุ่ม Add / Delete
+        JButton btnAdd = createButton("Add", 230, 470, 130, 35);
+        btnAdd.addActionListener(this::btnAddActionPerformed);
+        p.add(btnAdd);
 
-        JButton del = button("Delete", 390, 470, 130, 35);
-        del.addActionListener(e -> {
-            int row = tbl.getSelectedRow();
-            if (row < 0) { err("Please select a course first."); return; }
-            String cid = tbl.getValueAt(row, 0).toString();
-            if (JOptionPane.showConfirmDialog(this, "Delete " + cid + "?", "Confirm",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                try { ctrl.deleteCourse(cid); reload.run(); }
-                catch (IllegalArgumentException ex) { err(ex.getMessage()); }
-            }
-        });
-        p.add(del);
+        JButton btnDelete = createButton("Delete", 390, 470, 130, 35);
+        btnDelete.addActionListener(this::btnDeleteActionPerformed);
+        p.add(btnDelete);
+
+        loadCourses();
         return p;
     }
 
-    // ---------- Registration Period ----------
-    private JPanel periodPanel() {
-        JPanel p = page("Registration Period");
-        JLabel status = new JLabel(new ScheduleService().getRegistrationStatusText());
-        status.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        status.setBounds(32, 85, 600, 22);
-        p.add(status);
+    private void loadCourses() {
+        DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
+        model.setRowCount(0);
+        for (Course c : courseRepository.getAllCourses()) {
+            model.addRow(new Object[]{c.getCourseId(), c.getName(), c.getCredit(), c.getScheduleText()});
+        }
+    }
 
-        RegistrationPeriod cur = new RegistrationPeriodRepository().getPeriod();
-        JTextField open = new JTextField(cur == null ? "" : cur.getOpenAt().toString());
-        JTextField close = new JTextField(cur == null ? "" : cur.getCloseAt().toString());
+    private void btnAddActionPerformed(ActionEvent evt) {
+        try {
+            controller.addCourse(txtId.getText(), txtName.getText(), txtCredit.getText(),
+                    (String) cmbDay.getSelectedItem(), txtStart.getText(), txtEnd.getText());
+            txtId.setText("");
+            txtName.setText("");
+            txtCredit.setText("");
+            loadCourses();
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+        }
+    }
 
-        JLabel l1 = new JLabel("Open at (yyyy-MM-ddTHH:mm)");
-        l1.setBounds(32, 140, 300, 20);
-        open.setBounds(32, 165, 260, 35);
-        JLabel l2 = new JLabel("Close at (yyyy-MM-ddTHH:mm)");
-        l2.setBounds(32, 220, 300, 20);
-        close.setBounds(32, 245, 260, 35);
-        p.add(l1); p.add(open); p.add(l2); p.add(close);
+    private void btnDeleteActionPerformed(ActionEvent evt) {
+        int row = tblCourses.getSelectedRow();
+        if (row < 0) {
+            showError("Please select a course first.");
+            return;
+        }
 
-        JButton save = button("Save", 32, 305, 130, 35);
-        save.addActionListener(e -> {
+        String courseId = tblCourses.getValueAt(row, 0).toString();
+        int confirm = JOptionPane.showConfirmDialog(this, "Delete " + courseId + "?",
+                "Confirm", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
             try {
-                ctrl.setPeriod(open.getText(), close.getText());
-                JOptionPane.showMessageDialog(this, "Saved.");
-                show(periodPanel());
-            } catch (IllegalArgumentException ex) { err(ex.getMessage()); }
-        });
-        p.add(save);
+                controller.deleteCourse(courseId);
+                loadCourses();
+            } catch (IllegalArgumentException e) {
+                showError(e.getMessage());
+            }
+        }
+    }
+
+    // ===================== หน้า Registration Period =====================
+
+    private JPanel createPeriodPanel() {
+        JPanel p = createPage("Registration Period");
+
+        JLabel lblStatus = new JLabel(new ScheduleService().getRegistrationStatusText());
+        lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblStatus.setBounds(32, 85, 600, 22);
+        p.add(lblStatus);
+
+        // ค่าเดิมในไฟล์ (ถ้ามี) ใส่ไว้ในช่องให้ก่อน
+        RegistrationPeriod current = periodRepository.getPeriod();
+        txtOpen = new JTextField();
+        txtClose = new JTextField();
+        if (current != null) {
+            txtOpen.setText(current.getOpenAt().toString());
+            txtClose.setText(current.getCloseAt().toString());
+        }
+
+        JLabel lblOpen = new JLabel("Open at (yyyy-MM-ddTHH:mm)");
+        lblOpen.setBounds(32, 140, 300, 20);
+        txtOpen.setBounds(32, 165, 260, 35);
+
+        JLabel lblClose = new JLabel("Close at (yyyy-MM-ddTHH:mm)");
+        lblClose.setBounds(32, 220, 300, 20);
+        txtClose.setBounds(32, 245, 260, 35);
+
+        p.add(lblOpen);
+        p.add(txtOpen);
+        p.add(lblClose);
+        p.add(txtClose);
+
+        JButton btnSave = createButton("Save", 32, 305, 130, 35);
+        btnSave.addActionListener(this::btnSaveActionPerformed);
+        p.add(btnSave);
+
         return p;
+    }
+
+    private void btnSaveActionPerformed(ActionEvent evt) {
+        try {
+            controller.setPeriod(txtOpen.getText(), txtClose.getText());
+            JOptionPane.showMessageDialog(this, "Saved.");
+            showPanel(createPeriodPanel()); // โหลดหน้าใหม่เพื่ออัปเดตข้อความสถานะ
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+        }
     }
 }

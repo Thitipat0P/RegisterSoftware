@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
-import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -93,15 +92,15 @@ public class Dashboard extends JPanel {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
         model.setRowCount(0);
 
-        Map<String, String> enrolledAt = enrollmentRepository.getEnrolledAtMap(student.getId());
+        List<String> enrolledIds = enrollmentRepository.getEnrolledCourseIds(student.getId());
         int totalCredits = 0;
 
-        List<Course> all = courseRepository.getAllCourses();
-        for (Course course : all) {
-            if (enrolledAt.containsKey(course.getCourseId())) {
+        for (Course course : courseRepository.getAllCourses()) {
+            if (enrolledIds.contains(course.getCourseId())) {
+                String registeredAt = enrollmentRepository.getEnrolledAt(student.getId(), course.getCourseId());
                 model.addRow(new Object[]{
                         course.getCourseId(), course.getName(), course.getCredit(),
-                        course.getScheduleText(), enrolledAt.get(course.getCourseId())});
+                        course.getScheduleText(), registeredAt});
                 totalCredits += course.getCredit();
             }
         }

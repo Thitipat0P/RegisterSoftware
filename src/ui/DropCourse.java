@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.util.Map;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -26,7 +26,6 @@ import service.ScheduleService;
 public class DropCourse extends JPanel {
 
     private final Student student;
-    private final Runnable onChanged;
     private final CourseRepository courseRepository = new CourseRepository();
     private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final ScheduleService scheduleService = new ScheduleService();
@@ -34,10 +33,8 @@ public class DropCourse extends JPanel {
 
     private JTable tblCourses;
 
-    /** @param onChanged called after a successful withdrawal so the caller can refresh the view. */
-    public DropCourse(Student student, Runnable onChanged) {
+    public DropCourse(Student student) {
         this.student = student;
-        this.onChanged = onChanged;
         initComponents();
         loadData();
     }
@@ -104,11 +101,12 @@ public class DropCourse extends JPanel {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
         model.setRowCount(0);
 
-        Map<String, String> enrolledAt = enrollmentRepository.getEnrolledAtMap(student.getId());
+        List<String> enrolledIds = enrollmentRepository.getEnrolledCourseIds(student.getId());
         for (Course course : courseRepository.getAllCourses()) {
-            if (enrolledAt.containsKey(course.getCourseId())) {
+            if (enrolledIds.contains(course.getCourseId())) {
+                String registeredAt = enrollmentRepository.getEnrolledAt(student.getId(), course.getCourseId());
                 model.addRow(new Object[]{course.getCourseId(), course.getName(), course.getCredit(),
-                        course.getScheduleText(), enrolledAt.get(course.getCourseId())});
+                        course.getScheduleText(), registeredAt});
             }
         }
     }
@@ -131,11 +129,7 @@ public class DropCourse extends JPanel {
             try {
                 enrollmentController.drop(student.getId(), courseId);
                 JOptionPane.showMessageDialog(this, "Course withdrawn successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                if (onChanged != null) {
-                    onChanged.run();
-                } else {
-                    loadData();
-                }
+                loadData(); // โหลดตารางใหม่
             } catch (IllegalArgumentException e) {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Cannot withdraw", JOptionPane.ERROR_MESSAGE);
             }

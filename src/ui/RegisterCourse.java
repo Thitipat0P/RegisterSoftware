@@ -27,7 +27,6 @@ import service.ScheduleService;
 public class RegisterCourse extends JPanel {
 
     private final Student student;
-    private final Runnable onChanged;
     private final CourseRepository courseRepository = new CourseRepository();
     private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final ScheduleService scheduleService = new ScheduleService();
@@ -35,10 +34,8 @@ public class RegisterCourse extends JPanel {
 
     private JTable tblCourses;
 
-    /** @param onChanged called after a successful registration so the caller can refresh the view. */
-    public RegisterCourse(Student student, Runnable onChanged) {
+    public RegisterCourse(Student student) {
         this.student = student;
-        this.onChanged = onChanged;
         initComponents();
         loadData();
     }
@@ -140,11 +137,7 @@ public class RegisterCourse extends JPanel {
             try {
                 enrollmentController.register(student.getId(), courseId);
                 JOptionPane.showMessageDialog(this, "Course registered successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                if (onChanged != null) {
-                    onChanged.run();
-                } else {
-                    loadData();
-                }
+                loadData(); // โหลดตารางใหม่
             } catch (IllegalArgumentException e) {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Cannot register", JOptionPane.ERROR_MESSAGE);
             }

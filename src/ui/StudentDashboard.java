@@ -104,19 +104,11 @@ public class StudentDashboard extends JPanel {
     }
 
     private void btnRegisterCourseActionPerformed(ActionEvent evt) {
-        showRegisterCoursePanel();
+        showSubPanel(new RegisterCourse(student));
     }
 
     private void btnDropCourseActionPerformed(ActionEvent evt) {
-        showDropCoursePanel();
-    }
-
-    private void showRegisterCoursePanel() {
-        showSubPanel(new RegisterCourse(student, this::showRegisterCoursePanel));
-    }
-
-    private void showDropCoursePanel() {
-        showSubPanel(new DropCourse(student, this::showDropCoursePanel));
+        showSubPanel(new DropCourse(student));
     }
 
     private void btnLogoutActionPerformed(ActionEvent evt) {

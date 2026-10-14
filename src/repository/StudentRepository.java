@@ -1,7 +1,6 @@
 package repository;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -57,8 +56,7 @@ public class StudentRepository {
             return false;
         }
         try (FileWriter fw = new FileWriter(FILE_PATH, true);
-             BufferedWriter bw = new BufferedWriter(fw);
-             PrintWriter out = new PrintWriter(bw)) {
+             PrintWriter out = new PrintWriter(fw)) {
             out.println(studentId + "," + name + "," + email + "," + password);
             return true;
         } catch (Exception e) {

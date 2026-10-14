@@ -27,4 +27,22 @@ public class AdminRepository {
         }
         return null;
     }
+
+    /** True if an admin with this id exists (ใช้กันนักศึกษาสมัครด้วย ID เดียวกับ admin) */
+    public boolean exists(String id) {
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
+            br.readLine(); // skip header
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.isBlank()) continue;
+                String[] d = line.split(",", -1);
+                if (d.length >= 1 && d[0].trim().equalsIgnoreCase(id)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
