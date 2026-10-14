@@ -16,6 +16,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+//Controller และ Model ที่เกี่ยวข้องสำหรับการเข้าสู่ระบบ
 import controller.LoginController;
 import model.Student;
 import controller.AdminController;
@@ -26,13 +27,25 @@ import model.Admin;
  */
 public class LoginGUI extends JPanel {
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Course Registration - Login");
+            frame.setContentPane(new LoginGUI()); // กำหนดให้ LoginGUI เป็นหน้าจอหลัก
+            frame.pack();
+            frame.setResizable(false); // ล็อกไม่ให้ user ขยายหรือย่อขนาดหน้าต่าง
+            frame.setLocationRelativeTo(null); // จัดตำแหน่งหน้าต่างให้อยู่ตรงกลางหน้าจอคอมพิวเตอร์
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
+    }
+
     private final LoginController loginController = new LoginController();
     private final AdminController adminController = new AdminController();
 
-    private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);
-    private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);
-    private static final Color COLOR_BUTTON_BG = new Color(83, 96, 134);
-    private static final Color COLOR_LINK = new Color(0, 0, 204);
+    private static final Color COLOR_BRAND_BG = new Color(37, 51, 91); //สีฝั่งซ้าย
+    private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);//สีฝั่งขวา
+    private static final Color COLOR_BUTTON_BG = new Color(83, 96, 134);//สีปุ่ม
+    private static final Color COLOR_LINK = new Color(0, 0, 204);//สีข้อความ sign in สีฟ้า
 
     private JPanel leftPanel;
     private JPanel rightPanel;
@@ -180,15 +193,4 @@ public class LoginGUI extends JPanel {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Course Registration - Login");
-            frame.setContentPane(new LoginGUI());
-            frame.pack();
-            frame.setResizable(false);
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
-    }
 }

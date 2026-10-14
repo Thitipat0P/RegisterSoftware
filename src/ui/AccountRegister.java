@@ -23,6 +23,20 @@ import controller.RegisterController;
  */
 public class AccountRegister extends JPanel {
 
+
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Course Registration - Register");
+            frame.setContentPane(new AccountRegister());// กำหนดให้ AccountRegister เป็นหน้าจอหลัก
+            frame.pack();
+            frame.setResizable(false);// ล็อกไม่ให้ user ขยายหรือย่อขนาดหน้าต่าง
+            frame.setLocationRelativeTo(null);// จัดตำแหน่งหน้าต่างให้อยู่ตรงกลางหน้าจอคอมพิวเตอร์
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
+    }
+
     private final RegisterController registerController = new RegisterController();
 
     private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);
@@ -39,6 +53,7 @@ public class AccountRegister extends JPanel {
     private JPasswordField txtPassword;
     private JPasswordField txtConfirmPassword;
     private JButton btnRegister;
+
 
     public AccountRegister() {
         initComponents();
@@ -73,6 +88,9 @@ public class AccountRegister extends JPanel {
         return label;
     }
 
+    
+    
+     //เริ่มทำหน้าต่างด้านขวา//
     private void buildRightRegisterPanel() {
         rightPanel = new JPanel();
         rightPanel.setBackground(COLOR_PAGE_BG);
@@ -118,23 +136,27 @@ public class AccountRegister extends JPanel {
         btnRegister.setBackground(COLOR_BUTTON_BG);
         btnRegister.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnRegister.setForeground(Color.WHITE);
-        btnRegister.setFocusPainted(false);
+        btnRegister.setFocusPainted(false);   //ตรงนี้เป็นโค้ดซ่อนเส้นรอบๆตัวอักษร//
         btnRegister.setBounds(160, 425, 140, 35);
         btnRegister.addActionListener(this::btnRegisterActionPerformed);
         rightPanel.add(btnRegister);
 
+        // ลิงก์สลับไปหน้า Sign In 
         JLabel lblAlreadyHaveAccount = new JLabel("Already have an account?");
         lblAlreadyHaveAccount.setBounds(120, 480, 160, 20);
         rightPanel.add(lblAlreadyHaveAccount);
 
         JLabel lblSignIn = new JLabel("Sign in");
         lblSignIn.setForeground(COLOR_LINK);
-        lblSignIn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblSignIn.setCursor(new Cursor(Cursor.HAND_CURSOR));// เปลี่ยนเคอร์เซอร์เมาส์เป็นรูปมือเมื่อชี้ข้อความ
         lblSignIn.setBounds(275, 480, 60, 20);
+
+
+        //ใส่ event ให้ตัวอักษร Sign in ให้สามารถคลิ๊กได้//
         lblSignIn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
-                navigateToLogin();
+                navigateToLogin(); //สลับไปหน้า login
             }
         });
         rightPanel.add(lblSignIn);
@@ -142,6 +164,7 @@ public class AccountRegister extends JPanel {
         add(rightPanel);
     }
 
+    // เมธอดที่ใช้กำหนดให้ข้อความบน Field ให้อยู่ตรงกัน
     private JLabel fieldLabel(String text, int y) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
@@ -149,13 +172,15 @@ public class AccountRegister extends JPanel {
         return label;
     }
 
+    
     private void btnRegisterActionPerformed(ActionEvent evt) {
-        String studentId = txtStudentId.getText().trim();
+        String studentId = txtStudentId.getText().trim(); 
         String name = txtName.getText().trim();
         String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword());
         String confirmPassword = new String(txtConfirmPassword.getPassword());
 
+        //ถ้าใส่ครบจะแสดง Account created successfully!
         try {
             registerController.register(studentId, name, email, password, confirmPassword);
             JOptionPane.showMessageDialog(this, "Account created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -165,6 +190,9 @@ public class AccountRegister extends JPanel {
         }
     }
 
+    /**
+     * สลับหน้าจอจาก Register ไปยังหน้า Login
+     */
     private void navigateToLogin() {
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
@@ -175,15 +203,4 @@ public class AccountRegister extends JPanel {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Course Registration - Register");
-            frame.setContentPane(new AccountRegister());
-            frame.pack();
-            frame.setResizable(false);
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
-    }
 }
