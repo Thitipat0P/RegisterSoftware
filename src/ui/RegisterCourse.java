@@ -1,5 +1,6 @@
 package ui;
 
+import controller.EnrollmentController;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -12,8 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-
-import controller.EnrollmentController;
 import model.Course;
 import model.Student;
 import repository.CourseRepository;
@@ -21,38 +20,44 @@ import repository.EnrollmentRepository;
 import service.ScheduleService;
 
 /**
- * หน้า Sub-panel สำหรับแสดงรายวิชาที่เปิดให้ลงทะเบียน (Register Course)
- * แสดงเวลาเรียน, ช่วงเวลาเปิดลงทะเบียน และแจ้งเตือนวิชาที่เวลาชนกัน
+ * หน้า Sub-panel สำหรับแสดงรายวิชาที่เปิดให้ลงทะเบียน แสดงเวลาเรียน ช่วงเวลาเปิดลงทะเบียน และแจ้งเตือนวิชาที่เวลาชนกัน
  */
 public class RegisterCourse extends JPanel {
 
-    private final Student student; // นักศึกษาที่ login อยู่
+    private final Student student;
     private final CourseRepository courseRepository = new CourseRepository();
     private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final ScheduleService scheduleService = new ScheduleService();
     private final EnrollmentController enrollmentController = new EnrollmentController();
 
-    private JTable tblCourses; // ตารางวิชาที่ยังลงทะเบียนได้
+    private JTable tblCourses;
 
+    /**
+     * รับข้อมูล Student ที่กำลังใช้งานอยู่ ละเรียกใช้งานการสร้าง GUI พร้อมโหลดข้อมูลรายวิชา
+     */
     public RegisterCourse(Student student) {
         this.student = student;
-        initComponents();
-        loadData();
+        initComponents(); 
+        loadData();       // ดึงข้อมูลวิชาที่เปิดให้ลงทะเบียนมาแสดงในตาราง
     }
 
-    /** สร้างและจัดวางคอมโพเนนต์ทั้งหมด */
+    /**
+     * สร้างและกำหนดค่าองค์ประกอบทั้งหมดของหน้าต่าง GUI
+     * 
+     */
     private void initComponents() {
         setBackground(new Color(236, 238, 248));
         setLayout(null);
         setPreferredSize(new Dimension(760, 600));
 
+        // หัวข้อหลักของหน้าจอ
         JLabel lblTitle = new JLabel("Register Course");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 36));
         lblTitle.setForeground(new Color(37, 51, 91));
         lblTitle.setBounds(30, 30, 440, 50);
         add(lblTitle);
 
-        // แสดงสถานะช่วงเวลาลงทะเบียน (เขียว = เปิด, แดง = ปิด)
+        // ตรวจสอบและแสดงสถานะช่วงเวลาลงทะเบียน (สีเขียว = เปิดให้ลงทะเบียน, สีแดง = ปิด)
         boolean open = scheduleService.isRegistrationOpen();
         JLabel lblPeriod = new JLabel(scheduleService.getRegistrationStatusText());
         lblPeriod.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -60,7 +65,7 @@ public class RegisterCourse extends JPanel {
         lblPeriod.setBounds(32, 80, 600, 22);
         add(lblPeriod);
 
-        // กรอบสีขาวที่ครอบตาราง
+        // Panel คอนเทนเนอร์สำหรับใส่ตารางและปุ่ม
         JPanel tableContainerPanel = new JPanel();
         tableContainerPanel.setBackground(Color.WHITE);
         tableContainerPanel.setLayout(null);
@@ -72,7 +77,7 @@ public class RegisterCourse extends JPanel {
         lblTableTitle.setBounds(21, 8, 215, 30);
         tableContainerPanel.add(lblTableTitle);
 
-        // คอลัมน์ Note ใช้แจ้งว่าวิชานี้เวลาชนกับวิชาใด
+        // ตั้งค่าโครงสร้างคอลัมน์ของ JTable 
         String[] columns = {"Course ID", "Course Name", "Credit", "Class Time", "Note"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
@@ -90,53 +95,64 @@ public class RegisterCourse extends JPanel {
         scrollPane.setBounds(21, 50, 669, 328);
         tableContainerPanel.add(scrollPane);
 
-        // ปุ่ม Register
+        // ปุ่มลงทะเบียนวิชา
         JButton btnRegister = new JButton("Register");
         btnRegister.setBackground(new Color(83, 96, 134));
         btnRegister.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         btnRegister.setForeground(Color.WHITE);
         btnRegister.setFocusPainted(false);
         btnRegister.setBounds(292, 396, 130, 35);
-        btnRegister.addActionListener(this::btnRegisterActionPerformed);
+        btnRegister.addActionListener(this::btnRegisterActionPerformed); // ผูก Event เมื่อคลิกปุ่ม
         tableContainerPanel.add(btnRegister);
 
         add(tableContainerPanel);
     }
 
-    /** โหลดวิชาที่นักศึกษายังไม่ได้ลงทะเบียน พร้อมระบุหมายเหตุถ้าเวลาชน */
+    /**
+     * ดึงข้อมูลรายวิชาทั้งหมดเพื่อนำมาแสดงในตาราง โดยจะแสดงเฉพาะวิชาที่นักเรียนยังไม่ได้ลงทะเบียน 
+     * และตรวจสอบว่ามีเวลาเรียนชนกับวิชาที่ลงแล้วหรือไม่
+     */
     private void loadData() {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
-        model.setRowCount(0);
+        model.setRowCount(0); // ล้างข้อมูลเดิมในตารางก่อนโหลดใหม่
 
+        // ดึงรายการรหัสวิชาที่ลงทะเบียนไปแล้ว 
         List<String> enrolledIds = enrollmentRepository.getEnrolledCourseIds(student.getId());
         List<Course> enrolled = scheduleService.getEnrolledCourses(student.getId());
 
+        // วนลูปตรวจสอบวิชาทั้งหมดในระบบ
         for (Course course : courseRepository.getAllCourses()) {
-            // แสดงเฉพาะวิชาที่ยังไม่ได้ลง
+            // แสดงเฉพาะวิชาที่นักเรียนยังไม่ได้ลงทะเบียน
             if (!enrolledIds.contains(course.getCourseId())) {
-                // ตรวจว่าเวลาชนกับวิชาที่ลงไว้แล้วหรือไม่
+                // ตรวจสอบว่าเวลาเรียนชนกับวิชาเดิมหรือไม่
                 Course conflict = scheduleService.findConflict(enrolled, course);
                 String note = conflict == null ? "" : "Conflicts with " + conflict.getCourseId();
+                
+                // เพิ่มแถวข้อมูลเข้าตาราง
                 model.addRow(new Object[]{course.getCourseId(), course.getName(),
                         course.getCredit(), course.getScheduleText(), note});
             }
         }
     }
 
-    /** กดปุ่ม Register: ถามยืนยัน แล้วส่งให้ controller ลงทะเบียน */
+    /**
+     * ตรวจสอบการเลือกวิชา แสดง Pop-up ยืนยัน และส่งคำขอลงทะเบียนไปยัง EnrollmentController
+     */
     private void btnRegisterActionPerformed(ActionEvent evt) {
         int row = tblCourses.getSelectedRow();
-        if (row < 0) { // ยังไม่ได้เลือกวิชา
+        // ตรวจสอบว่าผู้ใช้ได้คลิกเลือกแถวในตารางแล้วหรือยัง
+        if (row < 0) {
             JOptionPane.showMessageDialog(this, "Please select a course first.", "Register", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // อ่านข้อมูลของแถวที่เลือก
+        // ดึงข้อมูลวิชาจากแถวที่เลือก
         String courseId = tblCourses.getValueAt(row, 0).toString();
         String courseName = tblCourses.getValueAt(row, 1).toString();
         String credit = tblCourses.getValueAt(row, 2).toString();
         String time = tblCourses.getValueAt(row, 3).toString();
 
+        // แสดง Dialog ให้ผู้ใช้ยืนยันการลงทะเบียน
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Register for " + courseId + " - " + courseName
                         + " (" + credit + " credits, " + time + ")?",
@@ -144,11 +160,12 @@ public class RegisterCourse extends JPanel {
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
+                // เรียก Controller เพื่อบันทึกการลงทะเบียน
                 enrollmentController.register(student.getId(), courseId);
                 JOptionPane.showMessageDialog(this, "Course registered successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                loadData(); // โหลดตารางใหม่
+                loadData(); // โหลดข้อมูลในตารางใหม่เพื่ออัปเดตสถานะ
             } catch (IllegalArgumentException e) {
-                // ลงไม่ได้ (นอกช่วงเวลา / ลงซ้ำ / เวลาชน ฯลฯ) -> แสดงข้อความจาก controller
+                // แสดงข้อผิดพลาด เช่น ชนช่วงเวลาลงทะเบียน หรือเวลาเรียนซ้อนทับกัน
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Cannot register", JOptionPane.ERROR_MESSAGE);
             }
         }
