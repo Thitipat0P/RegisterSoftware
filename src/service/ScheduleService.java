@@ -25,6 +25,7 @@ public class ScheduleService {
         return p == null || p.isOpen(LocalDateTime.now());
     }
 
+    /** ข้อความสถานะการลงทะเบียน สำหรับแสดงบนหน้าจอ */
     public String getRegistrationStatusText() {
         RegistrationPeriod p = periodRepository.getPeriod();
         if (p == null) return "Registration is open";
@@ -37,6 +38,7 @@ public class ScheduleService {
     public List<Course> getEnrolledCourses(String studentId) {
         List<String> ids = enrollmentRepository.getEnrolledCourseIds(studentId);
         List<Course> result = new ArrayList<>();
+        // กรองเฉพาะวิชาที่รหัสอยู่ในรายการที่นักศึกษาลงทะเบียนไว้
         for (Course c : courseRepository.getAllCourses()) {
             if (ids.contains(c.getCourseId())) result.add(c);
         }
@@ -46,6 +48,7 @@ public class ScheduleService {
     /** คืนวิชาที่เวลาชนกับ target (หรือ null ถ้าไม่ชน) */
     public Course findConflict(List<Course> enrolled, Course target) {
         for (Course c : enrolled) {
+            // ไม่เทียบกับตัวเอง และเช็คว่าเวลาซ้อนทับหรือไม่
             if (!c.getCourseId().equals(target.getCourseId()) && c.conflictsWith(target)) {
                 return c;
             }
@@ -53,6 +56,7 @@ public class ScheduleService {
         return null;
     }
 
+    /** เช็คเวลาชนจากรหัสนักศึกษา (ดึงวิชาที่ลงไว้แล้วมาเทียบกับ target) */
     public Course findConflict(String studentId, Course target) {
         return findConflict(getEnrolledCourses(studentId), target);
     }

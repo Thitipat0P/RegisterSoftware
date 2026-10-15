@@ -1,6 +1,7 @@
 package repository;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -8,6 +9,7 @@ import java.io.PrintWriter;
 import model.Student;
 
 /**
+ * Repository สำหรับข้อมูลนักศึกษา (อ่าน/เขียนไฟล์ CSV)
  * CSV format: id,name,email,password
  */
 public class StudentRepository {
@@ -17,11 +19,12 @@ public class StudentRepository {
     /** Returns the Student if id/password match, otherwise null. */
     public Student login(String studentId, String password) {
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
-            br.readLine(); // skip header
+            br.readLine(); // ข้ามบรรทัด header
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
                 String[] data = line.split(",", -1);
+                // data[0]=id, [1]=name, [2]=email, [3]=password
                 if (data.length >= 4 && data[0].trim().equals(studentId) && data[3].trim().equals(password)) {
                     return new Student(data[0].trim(), data[1].trim(), data[2].trim());
                 }
@@ -35,7 +38,7 @@ public class StudentRepository {
     /** True if a student with this id already exists. */
     public boolean exists(String studentId) {
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
-            br.readLine(); // skip header
+            br.readLine(); // ข้ามบรรทัด header
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
@@ -53,10 +56,12 @@ public class StudentRepository {
     /** Appends a new student row. Returns false on error or duplicate id. */
     public boolean register(String studentId, String name, String email, String password) {
         if (exists(studentId)) {
-            return false;
+            return false; // รหัสซ้ำ ห้ามสมัครซ้ำ
         }
+        // เปิดไฟล์โหมด append (true) เพื่อเพิ่มแถวใหม่ต่อท้าย
         try (FileWriter fw = new FileWriter(FILE_PATH, true);
-             PrintWriter out = new PrintWriter(fw)) {
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
             out.println(studentId + "," + name + "," + email + "," + password);
             return true;
         } catch (Exception e) {

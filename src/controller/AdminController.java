@@ -10,7 +10,6 @@ import model.Admin;
 import model.Course;
 import repository.AdminRepository;
 import repository.CourseRepository;
-import repository.EnrollmentRepository;
 import repository.RegistrationPeriodRepository;
 
 /** logic ฝั่ง Admin (ห้าม import javax.swing) */
@@ -18,7 +17,6 @@ public class AdminController {
 
     private final AdminRepository adminRepository = new AdminRepository();
     private final CourseRepository courseRepository = new CourseRepository();
-    private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final RegistrationPeriodRepository periodRepository = new RegistrationPeriodRepository();
 
     /** @return Admin ถ้า login ผ่าน, null ถ้าไม่ใช่ admin */
@@ -29,9 +27,11 @@ public class AdminController {
 
     /** @param day "TBA" หรือ MON..SUN */
     public void addCourse(String id, String name, String credit, String day, String start, String end) {
+        // --- ตรวจข้อมูลพื้นฐาน ---
         if (isBlank(id) || isBlank(name) || isBlank(credit)) {
             throw new IllegalArgumentException("Please fill in ID, Name and Credit.");
         }
+        // ห้ามมีเครื่องหมายจุลภาค เพราะจะทำให้โครงสร้างไฟล์ CSV เสีย
         if (id.contains(",") || name.contains(",")) {
             throw new IllegalArgumentException("ID/Name must not contain commas.");
         }
@@ -40,6 +40,7 @@ public class AdminController {
         catch (NumberFormatException e) { throw new IllegalArgumentException("Credit must be a number."); }
         if (cr <= 0) throw new IllegalArgumentException("Credit must be greater than 0.");
 
+        // --- ตรวจรหัสวิชาซ้ำ (ไม่สนตัวพิมพ์เล็ก/ใหญ่) ---
         List<Course> all = courseRepository.getAllCourses();
         for (Course c : all) {
             if (c.getCourseId().equalsIgnoreCase(id.trim())) {
@@ -47,10 +48,12 @@ public class AdminController {
             }
         }
 
+        // --- แปลงวันและเวลาเรียน (ถ้าเลือก TBA จะปล่อยเป็น null) ---
         DayOfWeek d = null;
         LocalTime s = null, e = null;
         if (day != null && !day.equals("TBA")) {
             try {
+                // หา DayOfWeek ที่ชื่อขึ้นต้นด้วยอักษรย่อ เช่น "MON" -> MONDAY
                 for (DayOfWeek x : DayOfWeek.values()) if (x.name().startsWith(day)) d = x;
                 s = LocalTime.parse(start.trim());
                 e = LocalTime.parse(end.trim());
@@ -61,24 +64,19 @@ public class AdminController {
                 throw new IllegalArgumentException("Start time must be before end time.");
             }
         }
+        // เพิ่มวิชาใหม่เข้ารายการ แล้วบันทึกทั้งไฟล์
         all.add(new Course(id.trim(), name.trim(), cr, d, s, e));
         courseRepository.saveAll(all);
     }
 
+    /** ลบวิชาตามรหัสวิชา (โยน exception ถ้าไม่พบ) */
     public void deleteCourse(String courseId) {
         List<Course> all = courseRepository.getAllCourses();
-        Course found = null;
-        for (Course c : all) {
-            if (c.getCourseId().equals(courseId)) {
-                found = c;
-            }
-        }
-        if (found == null) {
+        // removeIf คืน false ถ้าไม่มีรายการไหนถูกลบ
+        if (!all.removeIf(c -> c.getCourseId().equals(courseId))) {
             throw new IllegalArgumentException("Course not found: " + courseId);
         }
-        all.remove(found);
         courseRepository.saveAll(all);
-        enrollmentRepository.removeByCourse(courseId); // ลบข้อมูลลงทะเบียนของวิชานี้ด้วย
     }
 
     /** @param open/close ISO เช่น 2026-10-01T08:00 */
@@ -86,6 +84,7 @@ public class AdminController {
         try {
             LocalDateTime o = LocalDateTime.parse(open.trim());
             LocalDateTime c = LocalDateTime.parse(close.trim());
+            // เวลาเปิดต้องมาก่อนเวลาปิด
             if (!o.isBefore(c)) throw new IllegalArgumentException("Open time must be before close time.");
             if (!periodRepository.save(o, c)) throw new IllegalArgumentException("Could not save period.");
         } catch (DateTimeParseException ex) {

@@ -20,32 +20,20 @@ import controller.RegisterController;
 
 /**
  * หน้าสมัครสมาชิก (Account Register)
+ * นักศึกษากรอก ID, ชื่อ, อีเมล, รหัสผ่าน แล้วระบบบันทึกลง data/Student.csv
  */
 public class AccountRegister extends JPanel {
 
-
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Course Registration - Register");
-            frame.setContentPane(new AccountRegister());// กำหนดให้ AccountRegister เป็นหน้าจอหลัก
-            frame.pack();
-            frame.setResizable(false);// ล็อกไม่ให้ user ขยายหรือย่อขนาดหน้าต่าง
-            frame.setLocationRelativeTo(null);// จัดตำแหน่งหน้าต่างให้อยู่ตรงกลางหน้าจอคอมพิวเตอร์
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
-    }
-
     private final RegisterController registerController = new RegisterController();
 
+    // ชุดสีของหน้าจอ
     private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);
     private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);
     private static final Color COLOR_BUTTON_BG = new Color(83, 96, 134);
     private static final Color COLOR_LINK = new Color(0, 0, 204);
 
-    private JPanel leftPanel;
-    private JPanel rightPanel;
+    private JPanel leftPanel;   // ฝั่งซ้าย: แสดงชื่อระบบ
+    private JPanel rightPanel;  // ฝั่งขวา: ฟอร์มสมัครสมาชิก
 
     private JTextField txtStudentId;
     private JTextField txtName;
@@ -54,11 +42,11 @@ public class AccountRegister extends JPanel {
     private JPasswordField txtConfirmPassword;
     private JButton btnRegister;
 
-
     public AccountRegister() {
         initComponents();
     }
 
+    /** กำหนดขนาดหน้าและสร้างส่วนประกอบ */
     private void initComponents() {
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
@@ -67,6 +55,7 @@ public class AccountRegister extends JPanel {
         buildRightRegisterPanel();
     }
 
+    /** สร้างแผงฝั่งซ้ายที่แสดงชื่อระบบ */
     private void buildLeftBrandingPanel() {
         leftPanel = new JPanel();
         leftPanel.setBackground(COLOR_BRAND_BG);
@@ -80,6 +69,7 @@ public class AccountRegister extends JPanel {
         add(leftPanel);
     }
 
+    /** สร้างข้อความสีขาวตัวหนาสำหรับแผงแบรนด์ */
     private JLabel createBrandLabel(String text, int x, int y, int width, int height) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.BOLD, 36));
@@ -88,9 +78,7 @@ public class AccountRegister extends JPanel {
         return label;
     }
 
-    
-    
-     //เริ่มทำหน้าต่างด้านขวา//
+    /** สร้างแผงฝั่งขวาที่มีช่องกรอกข้อมูลสมัครสมาชิกทั้งหมด */
     private void buildRightRegisterPanel() {
         rightPanel = new JPanel();
         rightPanel.setBackground(COLOR_PAGE_BG);
@@ -102,61 +90,64 @@ public class AccountRegister extends JPanel {
         lblTitle.setBounds(120, 40, 250, 30);
         rightPanel.add(lblTitle);
 
+        // ช่อง Student ID
         rightPanel.add(fieldLabel("Student ID", 85));
         txtStudentId = new JTextField();
         txtStudentId.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtStudentId.setBounds(120, 105, 230, 35);
         rightPanel.add(txtStudentId);
 
+        // ช่อง Name
         rightPanel.add(fieldLabel("Name", 150));
         txtName = new JTextField();
         txtName.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtName.setBounds(120, 170, 230, 35);
         rightPanel.add(txtName);
 
+        // ช่อง Email
         rightPanel.add(fieldLabel("Email", 215));
         txtEmail = new JTextField();
         txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtEmail.setBounds(120, 235, 230, 35);
         rightPanel.add(txtEmail);
 
+        // ช่อง Password
         rightPanel.add(fieldLabel("Password", 280));
         txtPassword = new JPasswordField();
         txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtPassword.setBounds(120, 300, 230, 35);
         rightPanel.add(txtPassword);
 
+        // ช่อง Confirm Password
         rightPanel.add(fieldLabel("Confirm Password", 345));
         txtConfirmPassword = new JPasswordField();
         txtConfirmPassword.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtConfirmPassword.setBounds(120, 365, 230, 35);
         rightPanel.add(txtConfirmPassword);
 
+        // ปุ่มสมัครสมาชิก
         btnRegister = new JButton("Register");
         btnRegister.setBackground(COLOR_BUTTON_BG);
         btnRegister.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnRegister.setForeground(Color.WHITE);
-        btnRegister.setFocusPainted(false);   //ตรงนี้เป็นโค้ดซ่อนเส้นรอบๆตัวอักษร//
+        btnRegister.setFocusPainted(false);
         btnRegister.setBounds(160, 425, 140, 35);
         btnRegister.addActionListener(this::btnRegisterActionPerformed);
         rightPanel.add(btnRegister);
 
-        // ลิงก์สลับไปหน้า Sign In 
         JLabel lblAlreadyHaveAccount = new JLabel("Already have an account?");
         lblAlreadyHaveAccount.setBounds(120, 480, 160, 20);
         rightPanel.add(lblAlreadyHaveAccount);
 
+        // ลิงก์ "Sign in" กลับไปหน้า Login
         JLabel lblSignIn = new JLabel("Sign in");
         lblSignIn.setForeground(COLOR_LINK);
-        lblSignIn.setCursor(new Cursor(Cursor.HAND_CURSOR));// เปลี่ยนเคอร์เซอร์เมาส์เป็นรูปมือเมื่อชี้ข้อความ
+        lblSignIn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         lblSignIn.setBounds(275, 480, 60, 20);
-
-
-        //ใส่ event ให้ตัวอักษร Sign in ให้สามารถคลิ๊กได้//
         lblSignIn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {
-                navigateToLogin(); //สลับไปหน้า login
+                navigateToLogin();
             }
         });
         rightPanel.add(lblSignIn);
@@ -164,7 +155,7 @@ public class AccountRegister extends JPanel {
         add(rightPanel);
     }
 
-    // เมธอดที่ใช้กำหนดให้ข้อความบน Field ให้อยู่ตรงกัน
+    /** สร้างป้ายชื่อช่องกรอก (label) ที่ตำแหน่ง y ที่กำหนด */
     private JLabel fieldLabel(String text, int y) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
@@ -172,27 +163,25 @@ public class AccountRegister extends JPanel {
         return label;
     }
 
-    
+    /** จัดการการกดปุ่ม Register: ส่งข้อมูลให้ Controller ตรวจและบันทึก */
     private void btnRegisterActionPerformed(ActionEvent evt) {
-        String studentId = txtStudentId.getText().trim(); 
+        String studentId = txtStudentId.getText().trim();
         String name = txtName.getText().trim();
         String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword());
         String confirmPassword = new String(txtConfirmPassword.getPassword());
 
-        //ถ้าใส่ครบจะแสดง Account created successfully!
         try {
             registerController.register(studentId, name, email, password, confirmPassword);
             JOptionPane.showMessageDialog(this, "Account created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            navigateToLogin();
+            navigateToLogin(); // สมัครสำเร็จ -> กลับไปหน้า Login
         } catch (IllegalArgumentException e) {
+            // แสดงข้อผิดพลาด เช่น กรอกไม่ครบ / รหัสผ่านไม่ตรง / ID ซ้ำ
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /**
-     * สลับหน้าจอจาก Register ไปยังหน้า Login
-     */
+    /** สลับกลับไปหน้า Login */
     private void navigateToLogin() {
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
@@ -203,4 +192,16 @@ public class AccountRegister extends JPanel {
         }
     }
 
+    /** main สำหรับทดสอบเปิดหน้าสมัครสมาชิกเดี่ยว ๆ */
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Course Registration - Register");
+            frame.setContentPane(new AccountRegister());
+            frame.pack();
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
+    }
 }
