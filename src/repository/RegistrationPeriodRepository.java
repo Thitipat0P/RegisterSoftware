@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 import model.RegistrationPeriod;
 
 /**
- * Repository สำหรับช่วงเวลาลงทะเบียน (อ่าน/เขียนไฟล์ CSV)
+ * อ่าน/เขียนช่วงเวลาเปิด-ปิดลงทะเบียน
  * CSV format: openAt,closeAt   (ISO เช่น 2026-10-01T08:00)
  * มีแถวข้อมูลแถวเดียว. ถ้าไม่มีไฟล์/อ่านไม่ได้ จะคืน null (= เปิดตลอด)
  */
@@ -18,18 +18,18 @@ public class RegistrationPeriodRepository {
 
     private static final String FILE_PATH = "data/RegistrationPeriod.csv";
 
-    /** อ่านช่วงเวลาลงทะเบียนปัจจุบัน (คืน null ถ้าไม่มีไฟล์หรืออ่านไม่ได้) */
+    /** อ่านช่วงเวลาจากไฟล์ (คืน null ถ้าไม่มีไฟล์หรืออ่านไม่ได้) */
     public RegistrationPeriod getPeriod() {
         File f = new File(FILE_PATH);
-        if (!f.exists()) return null;
+        if (!f.exists()) return null; // ไม่มีไฟล์ = ไม่จำกัดเวลา
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-            br.readLine(); // ข้ามบรรทัด header
+            br.readLine(); // skip header
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
                 String[] d = line.split(",", -1);
                 if (d.length >= 2) {
-                    // แปลงข้อความ ISO เป็น LocalDateTime
+                    // d[0]=openAt, d[1]=closeAt
                     return new RegistrationPeriod(
                             LocalDateTime.parse(d[0].trim()),
                             LocalDateTime.parse(d[1].trim()));
@@ -41,11 +41,12 @@ public class RegistrationPeriodRepository {
         return null;
     }
 
-    /** บันทึกช่วงเวลาใหม่ทับไฟล์เดิม คืน true ถ้าสำเร็จ */
+    /** บันทึกช่วงเวลาใหม่ทับของเดิม (คืน true ถ้าสำเร็จ) */
     public boolean save(LocalDateTime open, LocalDateTime close) {
         try (PrintWriter out = new PrintWriter(new FileWriter(FILE_PATH, false))) {
             out.println("openAt,closeAt");
-            out.println(open + "," + close); // LocalDateTime.toString() ให้รูปแบบ ISO อยู่แล้ว
+            // LocalDateTime.toString() ให้รูปแบบ ISO ตรงกับที่ getPeriod() อ่านได้
+            out.println(open + "," + close);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

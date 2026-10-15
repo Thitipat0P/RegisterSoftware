@@ -20,33 +20,32 @@ import controller.RegisterController;
 
 /**
  * หน้าสมัครสมาชิก (Account Register)
- * นักศึกษากรอก ID, ชื่อ, อีเมล, รหัสผ่าน แล้วระบบบันทึกลง data/Student.csv
+ * ซ้าย = แบนเนอร์ชื่อระบบ, ขวา = ฟอร์มกรอกข้อมูลสมัคร
  */
 public class AccountRegister extends JPanel {
 
     private final RegisterController registerController = new RegisterController();
 
-    // ชุดสีของหน้าจอ
+    // สีของธีม
     private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);
     private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);
     private static final Color COLOR_BUTTON_BG = new Color(83, 96, 134);
     private static final Color COLOR_LINK = new Color(0, 0, 204);
 
-    private JPanel leftPanel;   // ฝั่งซ้าย: แสดงชื่อระบบ
-    private JPanel rightPanel;  // ฝั่งขวา: ฟอร์มสมัครสมาชิก
+    private JPanel leftPanel;
+    private JPanel rightPanel;
 
-    private JTextField txtStudentId;
-    private JTextField txtName;
-    private JTextField txtEmail;
-    private JPasswordField txtPassword;
-    private JPasswordField txtConfirmPassword;
+    private JTextField txtStudentId;             // รหัสนักศึกษา
+    private JTextField txtName;                  // ชื่อ
+    private JTextField txtEmail;                 // อีเมล
+    private JPasswordField txtPassword;          // รหัสผ่าน
+    private JPasswordField txtConfirmPassword;   // ยืนยันรหัสผ่าน
     private JButton btnRegister;
 
     public AccountRegister() {
         initComponents();
     }
 
-    /** กำหนดขนาดหน้าและสร้างส่วนประกอบ */
     private void initComponents() {
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
@@ -55,7 +54,7 @@ public class AccountRegister extends JPanel {
         buildRightRegisterPanel();
     }
 
-    /** สร้างแผงฝั่งซ้ายที่แสดงชื่อระบบ */
+    /** สร้างฝั่งซ้าย: พื้นสีกรมท่าพร้อมข้อความชื่อระบบ (เหมือนหน้า Login) */
     private void buildLeftBrandingPanel() {
         leftPanel = new JPanel();
         leftPanel.setBackground(COLOR_BRAND_BG);
@@ -69,7 +68,7 @@ public class AccountRegister extends JPanel {
         add(leftPanel);
     }
 
-    /** สร้างข้อความสีขาวตัวหนาสำหรับแผงแบรนด์ */
+    /** สร้างป้ายข้อความสีขาวตัวใหญ่สำหรับแบนเนอร์ */
     private JLabel createBrandLabel(String text, int x, int y, int width, int height) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.BOLD, 36));
@@ -78,7 +77,7 @@ public class AccountRegister extends JPanel {
         return label;
     }
 
-    /** สร้างแผงฝั่งขวาที่มีช่องกรอกข้อมูลสมัครสมาชิกทั้งหมด */
+    /** สร้างฝั่งขวา: ฟอร์มสมัครสมาชิก */
     private void buildRightRegisterPanel() {
         rightPanel = new JPanel();
         rightPanel.setBackground(COLOR_PAGE_BG);
@@ -90,42 +89,38 @@ public class AccountRegister extends JPanel {
         lblTitle.setBounds(120, 40, 250, 30);
         rightPanel.add(lblTitle);
 
-        // ช่อง Student ID
+        // แต่ละช่องกรอก = ป้ายชื่อ (fieldLabel) + ช่องกรอก วางเรียงลงมาตามแนวตั้ง
         rightPanel.add(fieldLabel("Student ID", 85));
         txtStudentId = new JTextField();
         txtStudentId.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtStudentId.setBounds(120, 105, 230, 35);
         rightPanel.add(txtStudentId);
 
-        // ช่อง Name
         rightPanel.add(fieldLabel("Name", 150));
         txtName = new JTextField();
         txtName.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtName.setBounds(120, 170, 230, 35);
         rightPanel.add(txtName);
 
-        // ช่อง Email
         rightPanel.add(fieldLabel("Email", 215));
         txtEmail = new JTextField();
         txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtEmail.setBounds(120, 235, 230, 35);
         rightPanel.add(txtEmail);
 
-        // ช่อง Password
         rightPanel.add(fieldLabel("Password", 280));
         txtPassword = new JPasswordField();
         txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtPassword.setBounds(120, 300, 230, 35);
         rightPanel.add(txtPassword);
 
-        // ช่อง Confirm Password
         rightPanel.add(fieldLabel("Confirm Password", 345));
         txtConfirmPassword = new JPasswordField();
         txtConfirmPassword.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         txtConfirmPassword.setBounds(120, 365, 230, 35);
         rightPanel.add(txtConfirmPassword);
 
-        // ปุ่มสมัครสมาชิก
+        // ปุ่ม Register
         btnRegister = new JButton("Register");
         btnRegister.setBackground(COLOR_BUTTON_BG);
         btnRegister.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -135,11 +130,11 @@ public class AccountRegister extends JPanel {
         btnRegister.addActionListener(this::btnRegisterActionPerformed);
         rightPanel.add(btnRegister);
 
+        // ลิงก์กลับไปหน้า Login สำหรับคนที่มีบัญชีแล้ว
         JLabel lblAlreadyHaveAccount = new JLabel("Already have an account?");
         lblAlreadyHaveAccount.setBounds(120, 480, 160, 20);
         rightPanel.add(lblAlreadyHaveAccount);
 
-        // ลิงก์ "Sign in" กลับไปหน้า Login
         JLabel lblSignIn = new JLabel("Sign in");
         lblSignIn.setForeground(COLOR_LINK);
         lblSignIn.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -155,7 +150,7 @@ public class AccountRegister extends JPanel {
         add(rightPanel);
     }
 
-    /** สร้างป้ายชื่อช่องกรอก (label) ที่ตำแหน่ง y ที่กำหนด */
+    /** สร้างป้ายชื่อเหนือช่องกรอก (กำหนดเฉพาะแกน y) */
     private JLabel fieldLabel(String text, int y) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12));
@@ -163,7 +158,7 @@ public class AccountRegister extends JPanel {
         return label;
     }
 
-    /** จัดการการกดปุ่ม Register: ส่งข้อมูลให้ Controller ตรวจและบันทึก */
+    /** กดปุ่ม Register: ส่งข้อมูลให้ controller ตรวจสอบและบันทึก */
     private void btnRegisterActionPerformed(ActionEvent evt) {
         String studentId = txtStudentId.getText().trim();
         String name = txtName.getText().trim();
@@ -174,9 +169,9 @@ public class AccountRegister extends JPanel {
         try {
             registerController.register(studentId, name, email, password, confirmPassword);
             JOptionPane.showMessageDialog(this, "Account created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            navigateToLogin(); // สมัครสำเร็จ -> กลับไปหน้า Login
+            navigateToLogin(); // สมัครสำเร็จ -> กลับหน้า Login
         } catch (IllegalArgumentException e) {
-            // แสดงข้อผิดพลาด เช่น กรอกไม่ครบ / รหัสผ่านไม่ตรง / ID ซ้ำ
+            // ข้อมูลไม่ถูกต้อง/ID ซ้ำ ฯลฯ -> แสดงข้อความจาก controller
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -192,7 +187,7 @@ public class AccountRegister extends JPanel {
         }
     }
 
-    /** main สำหรับทดสอบเปิดหน้าสมัครสมาชิกเดี่ยว ๆ */
+    /** main สำหรับเปิดหน้านี้ทดสอบเดี่ยว ๆ */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Course Registration - Register");

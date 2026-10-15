@@ -7,12 +7,12 @@ import java.util.Locale;
 /** ช่วงเวลาที่เปิดให้ลงทะเบียน / ถอนรายวิชา */
 public class RegistrationPeriod {
 
-    // รูปแบบวันเวลาที่ใช้แสดงผล เช่น "01 Oct 2026 08:00"
+    // รูปแบบวันที่ที่ใช้แสดงผล เช่น "01 Oct 2026 08:00"
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm", Locale.ENGLISH);
 
-    private final LocalDateTime openAt;   // เวลาเปิดรับลงทะเบียน
-    private final LocalDateTime closeAt;  // เวลาปิดรับลงทะเบียน
+    private final LocalDateTime openAt;   // เวลาเปิดลงทะเบียน
+    private final LocalDateTime closeAt;  // เวลาปิดลงทะเบียน
 
     public RegistrationPeriod(LocalDateTime openAt, LocalDateTime closeAt) {
         this.openAt = openAt;
@@ -22,7 +22,7 @@ public class RegistrationPeriod {
     public LocalDateTime getOpenAt()  { return openAt; }
     public LocalDateTime getCloseAt() { return closeAt; }
 
-    /** เปิดอยู่หรือไม่ ณ เวลา now (รวมขอบเขตทั้งเวลาเปิดและเวลาปิด) */
+    /** เวลา now อยู่ในช่วงเปิดลงทะเบียนหรือไม่ (รวมวินาทีที่เปิดและปิดพอดี) */
     public boolean isOpen(LocalDateTime now) {
         return !now.isBefore(openAt) && !now.isAfter(closeAt);
     }

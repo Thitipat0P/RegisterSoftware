@@ -14,13 +14,13 @@ import javax.swing.SwingUtilities;
 import model.Student;
 
 /**
- * หน้าหลักของนักศึกษาหลังล็อกอิน
- * ประกอบด้วยเมนูด้านซ้าย (Dashboard / Register / Drop / Logout)
- * และพื้นที่เนื้อหาด้านขวาที่สลับ Sub-panel ได้
+ * หน้าจอหลักของนักศึกษาหลัง login
+ * ซ้าย = เมนู (Dashboard / Register Course / Drop course / Logout)
+ * ขวา = เนื้อหาที่สลับตามเมนูที่กด
  */
 public class StudentDashboard extends JPanel {
 
-    private final Student student; // นักศึกษาที่ล็อกอินอยู่
+    private final Student student; // นักศึกษาที่ login อยู่ (ส่งต่อให้ sub-panel แต่ละหน้า)
 
     private JPanel sidePanel;         // แผงเมนูด้านซ้าย
     private JPanel mainContentPanel;  // พื้นที่แสดงเนื้อหาด้านขวา
@@ -36,7 +36,7 @@ public class StudentDashboard extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(null);
+        setLayout(null); // จัดตำแหน่งแบบกำหนดพิกัดเอง
         setPreferredSize(new Dimension(970, 600));
 
         // ------------------ Side Panel ------------------
@@ -45,6 +45,7 @@ public class StudentDashboard extends JPanel {
         sidePanel.setLayout(null);
         sidePanel.setBounds(0, 0, 210, 600);
 
+        // ชื่อระบบ 2 บรรทัดที่มุมบนซ้าย
         JLabel lblAppTitle1 = new JLabel("Course");
         lblAppTitle1.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblAppTitle1.setForeground(Color.WHITE);
@@ -57,7 +58,7 @@ public class StudentDashboard extends JPanel {
         lblAppTitle2.setBounds(20, 60, 160, 30);
         sidePanel.add(lblAppTitle2);
 
-        // ปุ่มเมนูต่าง ๆ เรียงลงมาทีละ 60 พิกเซล
+        // ปุ่มเมนู 4 ปุ่ม เรียงลงมา (ห่างกัน 60 px)
         btnDashboard = createMenuButton("Dashboard", 130);
         btnDashboard.addActionListener(this::btnDashboardActionPerformed);
         sidePanel.add(btnDashboard);
@@ -81,12 +82,12 @@ public class StudentDashboard extends JPanel {
         mainContentPanel.setBackground(new Color(236, 238, 248));
         mainContentPanel.setLayout(new BorderLayout());
         mainContentPanel.setBounds(210, 0, 760, 600);
-        mainContentPanel.add(new Dashboard(student), BorderLayout.CENTER); // หน้าเริ่มต้น = Dashboard
+        mainContentPanel.add(new Dashboard(student), BorderLayout.CENTER); // หน้าเริ่มต้นคือ Dashboard
 
         add(mainContentPanel);
     }
 
-    /** สร้างปุ่มเมนูมาตรฐานของแผงด้านซ้าย */
+    /** สร้างปุ่มเมนูตามสไตล์เดียวกัน (กำหนดเฉพาะตำแหน่งแกน y) */
     private JButton createMenuButton(String text, int yPosition) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -97,7 +98,7 @@ public class StudentDashboard extends JPanel {
         return btn;
     }
 
-    /** เปลี่ยนเนื้อหาฝั่งขวาเป็น panel ที่ส่งเข้ามา */
+    /** สลับเนื้อหาด้านขวา: เอาของเก่าออก ใส่ panel ใหม่ แล้ววาดใหม่ */
     private void showSubPanel(JPanel panel) {
         mainContentPanel.removeAll();
         mainContentPanel.add(panel, BorderLayout.CENTER);
@@ -106,30 +107,21 @@ public class StudentDashboard extends JPanel {
     }
 
     // ===================== Event Handlers =====================
+    // สร้าง panel ใหม่ทุกครั้งที่กด เพื่อให้ข้อมูลในตารางเป็นปัจจุบันเสมอ
 
     private void btnDashboardActionPerformed(ActionEvent evt) {
         showSubPanel(new Dashboard(student));
     }
 
     private void btnRegisterCourseActionPerformed(ActionEvent evt) {
-        showRegisterCoursePanel();
+        showSubPanel(new RegisterCourse(student));
     }
 
     private void btnDropCourseActionPerformed(ActionEvent evt) {
-        showDropCoursePanel();
+        showSubPanel(new DropCourse(student));
     }
 
-    /** แสดงหน้าลงทะเบียน (ส่ง callback ให้รีเฟรชหน้าเดิมหลังลงทะเบียนสำเร็จ) */
-    private void showRegisterCoursePanel() {
-        showSubPanel(new RegisterCourse(student, this::showRegisterCoursePanel));
-    }
-
-    /** แสดงหน้าถอนวิชา (ส่ง callback ให้รีเฟรชหน้าเดิมหลังถอนสำเร็จ) */
-    private void showDropCoursePanel() {
-        showSubPanel(new DropCourse(student, this::showDropCoursePanel));
-    }
-
-    /** ออกจากระบบ -> กลับหน้า Login */
+    /** ออกจากระบบ: กลับไปหน้า Login */
     private void btnLogoutActionPerformed(ActionEvent evt) {
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
