@@ -16,7 +16,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-//Controller และ Model ที่เกี่ยวข้องสำหรับการเข้าสู่ระบบ
 import controller.LoginController;
 import model.Student;
 import controller.AdminController;
@@ -24,31 +23,21 @@ import model.Admin;
 
 /**
  * หน้า Login ของระบบลงทะเบียนเรียน
+ * ใช้ล็อกอินได้ทั้งนักศึกษาและ Admin (ลองตรวจ Admin ก่อน แล้วค่อยตรวจนักศึกษา)
  */
 public class LoginGUI extends JPanel {
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Course Registration - Login");
-            frame.setContentPane(new LoginGUI()); // กำหนดให้ LoginGUI เป็นหน้าจอหลัก
-            frame.pack();
-            frame.setResizable(false); // ล็อกไม่ให้ user ขยายหรือย่อขนาดหน้าต่าง
-            frame.setLocationRelativeTo(null); // จัดตำแหน่งหน้าต่างให้อยู่ตรงกลางหน้าจอคอมพิวเตอร์
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
-    }
 
     private final LoginController loginController = new LoginController();
     private final AdminController adminController = new AdminController();
 
-    private static final Color COLOR_BRAND_BG = new Color(37, 51, 91); //สีฝั่งซ้าย
-    private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);//สีฝั่งขวา
-    private static final Color COLOR_BUTTON_BG = new Color(83, 96, 134);//สีปุ่ม
-    private static final Color COLOR_LINK = new Color(0, 0, 204);//สีข้อความ sign in สีฟ้า
+    // ชุดสีของหน้าจอ
+    private static final Color COLOR_BRAND_BG = new Color(37, 51, 91);
+    private static final Color COLOR_PAGE_BG = new Color(236, 238, 248);
+    private static final Color COLOR_BUTTON_BG = new Color(83, 96, 134);
+    private static final Color COLOR_LINK = new Color(0, 0, 204);
 
-    private JPanel leftPanel;
-    private JPanel rightPanel;
+    private JPanel leftPanel;   // ฝั่งซ้าย: แสดงชื่อระบบ
+    private JPanel rightPanel;  // ฝั่งขวา: ฟอร์มล็อกอิน
     private JLabel lblSignInTitle;
     private JLabel lblStudentId;
     private JLabel lblPassword;
@@ -63,6 +52,7 @@ public class LoginGUI extends JPanel {
         initComponents();
     }
 
+    /** กำหนดขนาดหน้าและสร้างส่วนประกอบ (ใช้ layout แบบกำหนดพิกัดเอง) */
     private void initComponents() {
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
@@ -71,6 +61,7 @@ public class LoginGUI extends JPanel {
         buildRightLoginPanel();
     }
 
+    /** สร้างแผงฝั่งซ้ายที่แสดงชื่อระบบ */
     private void buildLeftBrandingPanel() {
         leftPanel = new JPanel();
         leftPanel.setBackground(COLOR_BRAND_BG);
@@ -84,6 +75,7 @@ public class LoginGUI extends JPanel {
         add(leftPanel);
     }
 
+    /** สร้างข้อความสีขาวตัวหนาสำหรับแผงแบรนด์ */
     private JLabel createBrandLabel(String text, int x, int y, int width, int height) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Segoe UI", Font.BOLD, 36));
@@ -92,6 +84,7 @@ public class LoginGUI extends JPanel {
         return label;
     }
 
+    /** สร้างแผงฝั่งขวาที่มีช่องกรอก ID/Password ปุ่ม Login และลิงก์สมัครสมาชิก */
     private void buildRightLoginPanel() {
         rightPanel = new JPanel();
         rightPanel.setBackground(COLOR_PAGE_BG);
@@ -111,7 +104,7 @@ public class LoginGUI extends JPanel {
         txtStudentId = new JTextField();
         txtStudentId.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         txtStudentId.setBounds(120, 240, 230, 40);
-        txtStudentId.addActionListener(this::btnLoginActionPerformed);
+        txtStudentId.addActionListener(this::btnLoginActionPerformed); // กด Enter ในช่องนี้ = Login
         rightPanel.add(txtStudentId);
 
         lblPassword = new JLabel("Password");
@@ -122,7 +115,7 @@ public class LoginGUI extends JPanel {
         txtPassword = new JPasswordField();
         txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         txtPassword.setBounds(120, 320, 230, 40);
-        txtPassword.addActionListener(this::btnLoginActionPerformed);
+        txtPassword.addActionListener(this::btnLoginActionPerformed); // กด Enter ในช่องนี้ = Login
         rightPanel.add(txtPassword);
 
         btnLogin = new JButton("Login");
@@ -138,6 +131,7 @@ public class LoginGUI extends JPanel {
         lblNoAccount.setBounds(130, 430, 150, 20);
         rightPanel.add(lblNoAccount);
 
+        // ลิงก์ "Sign up" ไปหน้าสมัครสมาชิก
         lblSignUp = new JLabel("Sign up");
         lblSignUp.setForeground(COLOR_LINK);
         lblSignUp.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -153,37 +147,42 @@ public class LoginGUI extends JPanel {
         add(rightPanel);
     }
 
+    /** จัดการการกดปุ่ม Login: ตรวจ Admin ก่อน ถ้าไม่ใช่ให้ตรวจเป็นนักศึกษา */
     private void btnLoginActionPerformed(ActionEvent evt) {
         String studentId = txtStudentId.getText();
         String password = new String(txtPassword.getPassword());
 
+        // 1) ลองล็อกอินเป็น Admin ก่อน
         Admin admin = adminController.login(studentId, password);
-    if (admin != null) {
-        JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
-        if (f != null) {
-            f.setTitle("Course Registration - Admin");
-            f.setContentPane(new AdminDashboard(admin));
-            f.revalidate();
-            f.repaint();
+        if (admin != null) {
+            JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
+            if (f != null) {
+                f.setTitle("Course Registration - Admin");
+                f.setContentPane(new AdminDashboard(admin)); // สลับไปหน้า Admin
+                f.revalidate();
+                f.repaint();
+            }
+            return;
         }
-        return;
-    }
 
+        // 2) ถ้าไม่ใช่ Admin ให้ล็อกอินเป็นนักศึกษา
         try {
             Student student = loginController.login(studentId, password);
 
             JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
             if (frame != null) {
                 frame.setTitle("Course Registration - Student Dashboard");
-                frame.setContentPane(new StudentDashboard(student));
+                frame.setContentPane(new StudentDashboard(student)); // สลับไปหน้านักศึกษา
                 frame.revalidate();
                 frame.repaint();
             }
         } catch (IllegalArgumentException e) {
+            // แสดงข้อความผิดพลาด เช่น กรอกไม่ครบ หรือรหัสผ่านผิด
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    /** คลิก "Sign up" -> สลับไปหน้าสมัครสมาชิก */
     private void lblSignUpMouseClicked(MouseEvent evt) {
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
@@ -193,4 +192,16 @@ public class LoginGUI extends JPanel {
         }
     }
 
+    /** main สำหรับทดสอบเปิดหน้า Login เดี่ยว ๆ */
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Course Registration - Login");
+            frame.setContentPane(new LoginGUI());
+            frame.pack();
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
+    }
 }

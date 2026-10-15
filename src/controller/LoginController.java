@@ -16,9 +16,11 @@ public class LoginController {
      * @throws IllegalArgumentException ถ้ากรอกไม่ครบ หรือ ID/Password ผิด
      */
     public Student login(String id, String password) {
+        // ตรวจว่ากรอกครบหรือไม่
         if (id == null || id.trim().isEmpty() || password == null || password.isEmpty()) {
             throw new IllegalArgumentException("Please enter your ID and Password!");
         }
+        // ตรวจกับข้อมูลในไฟล์ (ตัดช่องว่างหัวท้ายออกก่อนเทียบ)
         Student student = studentRepository.login(id.trim(), password.trim());
         if (student == null) {
             throw new IllegalArgumentException("ID or Password is incorrect!");

@@ -10,36 +10,36 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
 import model.Student;
 
+/**
+ * หน้าหลักของนักศึกษาหลังล็อกอิน
+ * ประกอบด้วยเมนูด้านซ้าย (Dashboard / Register / Drop / Logout)
+ * และพื้นที่เนื้อหาด้านขวาที่สลับ Sub-panel ได้
+ */
 public class StudentDashboard extends JPanel {
 
-    private final Student student;
+    private final Student student; // นักศึกษาที่ล็อกอินอยู่
 
-    private JPanel sidePanel;
-    private JPanel mainContentPanel;
+    private JPanel sidePanel;         // แผงเมนูด้านซ้าย
+    private JPanel mainContentPanel;  // พื้นที่แสดงเนื้อหาด้านขวา
 
     private JButton btnDashboard;
     private JButton btnRegisterCourse;
     private JButton btnDropCourse;
     private JButton btnLogout;
 
-    /**
-     *  เรียกใช้งานการจัดสร้างองค์ประกอบ GUI
-     */
     public StudentDashboard(Student student) {
         this.student = student;
         initComponents();
     }
 
-    /**
-     * กำหนดโครงสร้าง layout หลัก จัดทำแถบเมนูด้านซ้าย และด้านขวา 
-     */
     private void initComponents() {
         setLayout(null);
         setPreferredSize(new Dimension(970, 600));
 
-        // แถบเมนูด้านซ้าย (Side Panel)
+        // ------------------ Side Panel ------------------
         sidePanel = new JPanel();
         sidePanel.setBackground(new Color(37, 51, 91));
         sidePanel.setLayout(null);
@@ -57,7 +57,7 @@ public class StudentDashboard extends JPanel {
         lblAppTitle2.setBounds(20, 60, 160, 30);
         sidePanel.add(lblAppTitle2);
 
-        // สร้างปุ่มเมนูต่างๆ ใน Side Panel และกำหนด Event
+        // ปุ่มเมนูต่าง ๆ เรียงลงมาทีละ 60 พิกเซล
         btnDashboard = createMenuButton("Dashboard", 130);
         btnDashboard.addActionListener(this::btnDashboardActionPerformed);
         sidePanel.add(btnDashboard);
@@ -76,22 +76,17 @@ public class StudentDashboard extends JPanel {
 
         add(sidePanel);
 
-        // พื้นที่แสดงเนื้อหาหลัก (Main Content Panel) 
+        // ------------------ Main Content Panel ------------------
         mainContentPanel = new JPanel();
         mainContentPanel.setBackground(new Color(236, 238, 248));
         mainContentPanel.setLayout(new BorderLayout());
         mainContentPanel.setBounds(210, 0, 760, 600);
-        
-        // กำหนดหน้าเริ่มต้นให้แสดงผลหน้า Dashboard
-        mainContentPanel.add(new Dashboard(student), BorderLayout.CENTER);
+        mainContentPanel.add(new Dashboard(student), BorderLayout.CENTER); // หน้าเริ่มต้น = Dashboard
 
         add(mainContentPanel);
     }
 
-    /**
-     * สร้างและกำหนดสไตล์ของปุ่มเมนู
-     *
-     */
+    /** สร้างปุ่มเมนูมาตรฐานของแผงด้านซ้าย */
     private JButton createMenuButton(String text, int yPosition) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -102,48 +97,44 @@ public class StudentDashboard extends JPanel {
         return btn;
     }
 
-    /**
-     * เมธอดสำหรับเปลี่ยนหน้าเมนูทางด้านขวา
-     */
+    /** เปลี่ยนเนื้อหาฝั่งขวาเป็น panel ที่ส่งเข้ามา */
     private void showSubPanel(JPanel panel) {
-        mainContentPanel.removeAll();                 
-        mainContentPanel.add(panel, BorderLayout.CENTER); 
-        mainContentPanel.revalidate();                
-        mainContentPanel.repaint();                    
+        mainContentPanel.removeAll();
+        mainContentPanel.add(panel, BorderLayout.CENTER);
+        mainContentPanel.revalidate();
+        mainContentPanel.repaint();
     }
 
-    //  Event Handlers สำหรับปุ่มเมนู 
+    // ===================== Event Handlers =====================
 
-    /**
-     * สลับไปแสดงหน้าภาพรวม Dashboard
-     */
     private void btnDashboardActionPerformed(ActionEvent evt) {
         showSubPanel(new Dashboard(student));
     }
 
-    /**
-     * สลับไปแสดงหน้าลงทะเบียนวิชา 
-     */
     private void btnRegisterCourseActionPerformed(ActionEvent evt) {
-        showSubPanel(new RegisterCourse(student));
+        showRegisterCoursePanel();
     }
 
-    /**
-     * สลับไปแสดงหน้าถอนวิชา 
-     */
     private void btnDropCourseActionPerformed(ActionEvent evt) {
-        showSubPanel(new DropCourse(student));
+        showDropCoursePanel();
     }
 
-    /**
-     * ออกจากระบบ ทำการสลับหน้าจอกลับไปยังหน้าเข้าสู่ระบบ 
-     */
+    /** แสดงหน้าลงทะเบียน (ส่ง callback ให้รีเฟรชหน้าเดิมหลังลงทะเบียนสำเร็จ) */
+    private void showRegisterCoursePanel() {
+        showSubPanel(new RegisterCourse(student, this::showRegisterCoursePanel));
+    }
+
+    /** แสดงหน้าถอนวิชา (ส่ง callback ให้รีเฟรชหน้าเดิมหลังถอนสำเร็จ) */
+    private void showDropCoursePanel() {
+        showSubPanel(new DropCourse(student, this::showDropCoursePanel));
+    }
+
+    /** ออกจากระบบ -> กลับหน้า Login */
     private void btnLogoutActionPerformed(ActionEvent evt) {
-        // ค้นหา Frame หลักที่เป็นองค์ประกอบหลัก
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
             frame.setTitle("Course Registration - Login");
-            frame.setContentPane(new LoginGUI()); // เปลี่ยน ContentPane ไปหน้า Login
+            frame.setContentPane(new LoginGUI());
             frame.revalidate();
             frame.repaint();
         }

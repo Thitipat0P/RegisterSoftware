@@ -17,16 +17,20 @@ public class EnrollmentController {
 
     /** @throws IllegalArgumentException ถ้านอกช่วงเวลา / วิชาไม่มี / ลงซ้ำ / เวลาเรียนชน */
     public void register(String studentId, String courseId) {
+        // 1) ต้องอยู่ในช่วงเวลาที่เปิดให้ลงทะเบียน
         if (!scheduleService.isRegistrationOpen()) {
             throw new IllegalArgumentException(scheduleService.getRegistrationStatusText());
         }
+        // 2) วิชาต้องมีอยู่จริง
         Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
             throw new IllegalArgumentException("Course not found: " + courseId);
         }
+        // 3) ห้ามลงวิชาซ้ำ
         if (enrollmentRepository.getEnrolledCourseIds(studentId).contains(courseId)) {
             throw new IllegalArgumentException("You are already registered for " + courseId + ".");
         }
+        // 4) เวลาเรียนต้องไม่ชนกับวิชาที่ลงไว้แล้ว
         Course conflict = scheduleService.findConflict(studentId, course);
         if (conflict != null) {
             throw new IllegalArgumentException("Time conflict!\n"
@@ -34,6 +38,7 @@ public class EnrollmentController {
                     + "overlaps with\n"
                     + conflict.getCourseId() + " (" + conflict.getScheduleText() + ")");
         }
+        // 5) บันทึกการลงทะเบียน
         if (!enrollmentRepository.enroll(studentId, courseId)) {
             throw new IllegalArgumentException("Could not register this course.");
         }
@@ -41,6 +46,7 @@ public class EnrollmentController {
 
     /** @throws IllegalArgumentException ถ้านอกช่วงเวลา หรือถอนไม่สำเร็จ */
     public void drop(String studentId, String courseId) {
+        // การถอนรายวิชาต้องอยู่ในช่วงเวลาเดียวกับการลงทะเบียน
         if (!scheduleService.isRegistrationOpen()) {
             throw new IllegalArgumentException(scheduleService.getRegistrationStatusText());
         }
