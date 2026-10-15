@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.util.Map;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,23 +25,21 @@ import service.ScheduleService;
  */
 public class DropCourse extends JPanel {
 
-    private final Student student;
-    private final Runnable onChanged; // callback เรียกหลังถอนสำเร็จ เพื่อรีเฟรชหน้า
+    private final Student student; // นักศึกษาที่ login อยู่
     private final CourseRepository courseRepository = new CourseRepository();
     private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final ScheduleService scheduleService = new ScheduleService();
     private final EnrollmentController enrollmentController = new EnrollmentController();
 
-    private JTable tblCourses; // ตารางวิชาที่ลงทะเบียนไว้ (เลือกเพื่อถอน)
+    private JTable tblCourses; // ตารางวิชาที่ลงทะเบียนไว้ (เลือกแถวเพื่อถอน)
 
-    /** @param onChanged called after a successful withdrawal so the caller can refresh the view. */
-    public DropCourse(Student student, Runnable onChanged) {
+    public DropCourse(Student student) {
         this.student = student;
-        this.onChanged = onChanged;
         initComponents();
         loadData();
     }
 
+    /** สร้างและจัดวางคอมโพเนนต์ทั้งหมด */
     private void initComponents() {
         setBackground(new Color(236, 238, 248));
         setLayout(null);
@@ -53,7 +51,7 @@ public class DropCourse extends JPanel {
         lblTitle.setBounds(30, 30, 440, 50);
         add(lblTitle);
 
-        // แสดงสถานะช่วงเวลาลงทะเบียน (เขียว = เปิด, แดง = ปิด)
+        // แสดงสถานะช่วงเวลา (เขียว = เปิด, แดง = ปิด) เพราะถอนได้เฉพาะช่วงที่เปิดลงทะเบียน
         boolean open = scheduleService.isRegistrationOpen();
         JLabel lblPeriod = new JLabel(scheduleService.getRegistrationStatusText());
         lblPeriod.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -61,7 +59,7 @@ public class DropCourse extends JPanel {
         lblPeriod.setBounds(32, 80, 600, 22);
         add(lblPeriod);
 
-        // กล่องสีขาวที่ครอบตาราง
+        // กรอบสีขาวที่ครอบตาราง
         JPanel tableContainerPanel = new JPanel();
         tableContainerPanel.setBackground(Color.WHITE);
         tableContainerPanel.setLayout(null);
@@ -73,7 +71,7 @@ public class DropCourse extends JPanel {
         lblTableTitle.setBounds(21, 8, 215, 30);
         tableContainerPanel.add(lblTableTitle);
 
-        // ตารางแบบอ่านอย่างเดียว
+        // ตารางแสดงวิชาที่ลงไว้ (แก้ไขช่องในตารางไม่ได้)
         String[] columns = {"Course ID", "Course Name", "Credit", "Class Time", "Registered At"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
@@ -91,6 +89,7 @@ public class DropCourse extends JPanel {
         scrollPane.setBounds(21, 50, 669, 328);
         tableContainerPanel.add(scrollPane);
 
+        // ปุ่ม Drop
         JButton btnDrop = new JButton("Drop");
         btnDrop.setBackground(new Color(83, 96, 134));
         btnDrop.setFont(new Font("Segoe UI", Font.PLAIN, 18));
@@ -103,31 +102,29 @@ public class DropCourse extends JPanel {
         add(tableContainerPanel);
     }
 
-    /** โหลดวิชาที่นักศึกษาลงทะเบียนไว้มาแสดงในตาราง */
+    /** โหลดเฉพาะวิชาที่นักศึกษาลงทะเบียนไว้มาแสดงในตาราง */
     private void loadData() {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
         model.setRowCount(0);
 
-        // courseId -> เวลาที่ลงทะเบียน
-        Map<String, String> enrolledAt = enrollmentRepository.getEnrolledAtMap(student.getId());
+        List<String> enrolledIds = enrollmentRepository.getEnrolledCourseIds(student.getId());
         for (Course course : courseRepository.getAllCourses()) {
-            if (enrolledAt.containsKey(course.getCourseId())) {
+            if (enrolledIds.contains(course.getCourseId())) {
+                String registeredAt = enrollmentRepository.getEnrolledAt(student.getId(), course.getCourseId());
                 model.addRow(new Object[]{course.getCourseId(), course.getName(), course.getCredit(),
-                        course.getScheduleText(), enrolledAt.get(course.getCourseId())});
+                        course.getScheduleText(), registeredAt});
             }
         }
     }
 
-    /** จัดการการกดปุ่ม Drop: ยืนยัน แล้วส่งให้ Controller ถอนรายวิชา */
+    /** กดปุ่ม Drop: ถามยืนยัน แล้วส่งให้ controller ถอนวิชา */
     private void btnDropActionPerformed(ActionEvent evt) {
         int row = tblCourses.getSelectedRow();
-        if (row < 0) {
-            // ยังไม่ได้เลือกแถวในตาราง
+        if (row < 0) { // ยังไม่ได้เลือกวิชา
             JOptionPane.showMessageDialog(this, "Please select a course first.", "Drop", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // ดึงข้อมูลของแถวที่เลือก
         String courseId = tblCourses.getValueAt(row, 0).toString();
         String courseName = tblCourses.getValueAt(row, 1).toString();
 
@@ -139,14 +136,9 @@ public class DropCourse extends JPanel {
             try {
                 enrollmentController.drop(student.getId(), courseId);
                 JOptionPane.showMessageDialog(this, "Course withdrawn successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // รีเฟรชหน้า: ใช้ callback ถ้ามี ไม่เช่นนั้นโหลดตารางใหม่เอง
-                if (onChanged != null) {
-                    onChanged.run();
-                } else {
-                    loadData();
-                }
+                loadData(); // โหลดตารางใหม่
             } catch (IllegalArgumentException e) {
-                // เช่น นอกช่วงเวลาลงทะเบียน / ถอนไม่สำเร็จ
+                // ถอนไม่ได้ (เช่น นอกช่วงเวลา) -> แสดงข้อความจาก controller
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Cannot withdraw", JOptionPane.ERROR_MESSAGE);
             }
         }

@@ -26,23 +26,21 @@ import service.ScheduleService;
  */
 public class RegisterCourse extends JPanel {
 
-    private final Student student;
-    private final Runnable onChanged; // callback เรียกหลังลงทะเบียนสำเร็จ เพื่อรีเฟรชหน้า
+    private final Student student; // นักศึกษาที่ login อยู่
     private final CourseRepository courseRepository = new CourseRepository();
     private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
     private final ScheduleService scheduleService = new ScheduleService();
     private final EnrollmentController enrollmentController = new EnrollmentController();
 
-    private JTable tblCourses; // ตารางวิชาที่ยังไม่ได้ลงทะเบียน
+    private JTable tblCourses; // ตารางวิชาที่ยังลงทะเบียนได้
 
-    /** @param onChanged called after a successful registration so the caller can refresh the view. */
-    public RegisterCourse(Student student, Runnable onChanged) {
+    public RegisterCourse(Student student) {
         this.student = student;
-        this.onChanged = onChanged;
         initComponents();
         loadData();
     }
 
+    /** สร้างและจัดวางคอมโพเนนต์ทั้งหมด */
     private void initComponents() {
         setBackground(new Color(236, 238, 248));
         setLayout(null);
@@ -62,7 +60,7 @@ public class RegisterCourse extends JPanel {
         lblPeriod.setBounds(32, 80, 600, 22);
         add(lblPeriod);
 
-        // กล่องสีขาวที่ครอบตาราง
+        // กรอบสีขาวที่ครอบตาราง
         JPanel tableContainerPanel = new JPanel();
         tableContainerPanel.setBackground(Color.WHITE);
         tableContainerPanel.setLayout(null);
@@ -74,7 +72,7 @@ public class RegisterCourse extends JPanel {
         lblTableTitle.setBounds(21, 8, 215, 30);
         tableContainerPanel.add(lblTableTitle);
 
-        // ตารางแบบอ่านอย่างเดียว คอลัมน์ Note ใช้แจ้งเตือนเวลาเรียนชนกัน
+        // คอลัมน์ Note ใช้แจ้งว่าวิชานี้เวลาชนกับวิชาใด
         String[] columns = {"Course ID", "Course Name", "Credit", "Class Time", "Note"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
@@ -92,6 +90,7 @@ public class RegisterCourse extends JPanel {
         scrollPane.setBounds(21, 50, 669, 328);
         tableContainerPanel.add(scrollPane);
 
+        // ปุ่ม Register
         JButton btnRegister = new JButton("Register");
         btnRegister.setBackground(new Color(83, 96, 134));
         btnRegister.setFont(new Font("Segoe UI", Font.PLAIN, 18));
@@ -104,7 +103,7 @@ public class RegisterCourse extends JPanel {
         add(tableContainerPanel);
     }
 
-    /** โหลดวิชาที่ยังไม่ได้ลงทะเบียนมาแสดง พร้อมหมายเหตุถ้าเวลาชนกับวิชาที่ลงไว้แล้ว */
+    /** โหลดวิชาที่นักศึกษายังไม่ได้ลงทะเบียน พร้อมระบุหมายเหตุถ้าเวลาชน */
     private void loadData() {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
         model.setRowCount(0);
@@ -115,6 +114,7 @@ public class RegisterCourse extends JPanel {
         for (Course course : courseRepository.getAllCourses()) {
             // แสดงเฉพาะวิชาที่ยังไม่ได้ลง
             if (!enrolledIds.contains(course.getCourseId())) {
+                // ตรวจว่าเวลาชนกับวิชาที่ลงไว้แล้วหรือไม่
                 Course conflict = scheduleService.findConflict(enrolled, course);
                 String note = conflict == null ? "" : "Conflicts with " + conflict.getCourseId();
                 model.addRow(new Object[]{course.getCourseId(), course.getName(),
@@ -123,16 +123,15 @@ public class RegisterCourse extends JPanel {
         }
     }
 
-    /** จัดการการกดปุ่ม Register: ยืนยัน แล้วส่งให้ Controller ตรวจเงื่อนไขและบันทึก */
+    /** กดปุ่ม Register: ถามยืนยัน แล้วส่งให้ controller ลงทะเบียน */
     private void btnRegisterActionPerformed(ActionEvent evt) {
         int row = tblCourses.getSelectedRow();
-        if (row < 0) {
-            // ยังไม่ได้เลือกแถวในตาราง
+        if (row < 0) { // ยังไม่ได้เลือกวิชา
             JOptionPane.showMessageDialog(this, "Please select a course first.", "Register", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // ดึงข้อมูลของแถวที่เลือก
+        // อ่านข้อมูลของแถวที่เลือก
         String courseId = tblCourses.getValueAt(row, 0).toString();
         String courseName = tblCourses.getValueAt(row, 1).toString();
         String credit = tblCourses.getValueAt(row, 2).toString();
@@ -147,14 +146,9 @@ public class RegisterCourse extends JPanel {
             try {
                 enrollmentController.register(student.getId(), courseId);
                 JOptionPane.showMessageDialog(this, "Course registered successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                // รีเฟรชหน้า: ใช้ callback ถ้ามี ไม่เช่นนั้นโหลดตารางใหม่เอง
-                if (onChanged != null) {
-                    onChanged.run();
-                } else {
-                    loadData();
-                }
+                loadData(); // โหลดตารางใหม่
             } catch (IllegalArgumentException e) {
-                // เช่น นอกช่วงเวลา / ลงซ้ำ / เวลาเรียนชน
+                // ลงไม่ได้ (นอกช่วงเวลา / ลงซ้ำ / เวลาชน ฯลฯ) -> แสดงข้อความจาก controller
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Cannot register", JOptionPane.ERROR_MESSAGE);
             }
         }

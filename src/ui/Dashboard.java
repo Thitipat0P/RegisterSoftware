@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
-import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -22,24 +21,26 @@ import repository.EnrollmentRepository;
  */
 public class Dashboard extends JPanel {
 
-    private final Student student;
+    private final Student student; // นักศึกษาที่ login อยู่
     private final CourseRepository courseRepository = new CourseRepository();
     private final EnrollmentRepository enrollmentRepository = new EnrollmentRepository();
 
-    private JTable tblCourses;        // ตารางวิชาที่ลงทะเบียนแล้ว
-    private JLabel lblTotalCredits;   // ป้ายแสดงหน่วยกิตรวม
+    private JTable tblCourses;         // ตารางวิชาที่ลงทะเบียนแล้ว
+    private JLabel lblTotalCredits;    // ป้ายแสดงหน่วยกิตรวม
 
     public Dashboard(Student student) {
         this.student = student;
-        initComponents();
-        loadData(); // โหลดข้อมูลลงตารางหลังสร้างหน้าเสร็จ
+        initComponents(); // สร้างหน้าจอ
+        loadData();       // โหลดข้อมูลลงตาราง
     }
 
+    /** สร้างและจัดวางคอมโพเนนต์ทั้งหมด */
     private void initComponents() {
         setBackground(new Color(236, 238, 248));
         setLayout(null);
         setPreferredSize(new Dimension(760, 600));
 
+        // หัวข้อหน้า
         JLabel lblTitle = new JLabel("Student Dashboard");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 36));
         lblTitle.setForeground(new Color(37, 51, 91));
@@ -53,7 +54,7 @@ public class Dashboard extends JPanel {
         lblWelcome.setBounds(30, 70, 400, 30);
         add(lblWelcome);
 
-        // กล่องสีขาวที่ครอบตาราง
+        // กรอบสีขาวที่ครอบตาราง
         JPanel tableContainerPanel = new JPanel();
         tableContainerPanel.setBackground(Color.WHITE);
         tableContainerPanel.setLayout(null);
@@ -65,7 +66,7 @@ public class Dashboard extends JPanel {
         lblTableTitle.setBounds(20, 10, 300, 30);
         tableContainerPanel.add(lblTableTitle);
 
-        // ตารางแบบอ่านอย่างเดียว (ห้ามแก้ไขเซลล์)
+        // ตารางแสดงวิชา (แก้ไขช่องในตารางไม่ได้)
         String[] columns = {"Course ID", "Course Name", "Credit", "Class Time", "Registered At"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
@@ -84,6 +85,7 @@ public class Dashboard extends JPanel {
         scrollPane.setBounds(20, 50, 670, 340);
         tableContainerPanel.add(scrollPane);
 
+        // ป้ายแสดงหน่วยกิตรวม
         lblTotalCredits = new JLabel("Total Credits: 0");
         lblTotalCredits.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblTotalCredits.setForeground(new Color(37, 51, 91));
@@ -93,22 +95,23 @@ public class Dashboard extends JPanel {
         add(tableContainerPanel);
     }
 
-    /** โหลดวิชาที่นักศึกษาลงทะเบียนไว้มาแสดง และรวมหน่วยกิต */
+    /** โหลดวิชาที่นักศึกษาลงทะเบียนไว้มาแสดง พร้อมคำนวณหน่วยกิตรวม */
     private void loadData() {
         DefaultTableModel model = (DefaultTableModel) tblCourses.getModel();
         model.setRowCount(0); // ล้างตารางก่อน
 
-        // courseId -> เวลาที่ลงทะเบียน
-        Map<String, String> enrolledAt = enrollmentRepository.getEnrolledAtMap(student.getId());
+        // รหัสวิชาที่นักศึกษาลงทะเบียนอยู่
+        List<String> enrolledIds = enrollmentRepository.getEnrolledCourseIds(student.getId());
         int totalCredits = 0;
 
-        List<Course> all = courseRepository.getAllCourses();
-        for (Course course : all) {
-            if (enrolledAt.containsKey(course.getCourseId())) {
+        // วนดูทุกวิชา แล้วเลือกเฉพาะวิชาที่ลงทะเบียนไว้
+        for (Course course : courseRepository.getAllCourses()) {
+            if (enrolledIds.contains(course.getCourseId())) {
+                String registeredAt = enrollmentRepository.getEnrolledAt(student.getId(), course.getCourseId());
                 model.addRow(new Object[]{
                         course.getCourseId(), course.getName(), course.getCredit(),
-                        course.getScheduleText(), enrolledAt.get(course.getCourseId())});
-                totalCredits += course.getCredit(); // สะสมหน่วยกิต
+                        course.getScheduleText(), registeredAt});
+                totalCredits += course.getCredit();
             }
         }
 
